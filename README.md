@@ -193,8 +193,25 @@ StockPulse/
 | **Auth** | [AuthProvider](src/store/auth.context.tsx) wraps the app; uses `Auth0Provider` and `useAuth0`. Session restored via `hasValidCredentials()`. Sign-out clears watchlist and alerts stores. |
 | **Navigation** | [src/navigation/index.tsx](src/navigation/index.tsx): static navigation with `useIsSignedIn` / `useIsSignedOut`. Tabs: Home, Charts, Alerts, Settings. Stack: CreateAlert. |
 | **State** | Zustand stores in [src/store/](src/store/) (watchlist, alerts, preferences) with MMKV persistence. [LivePricesProvider](src/store/live-prices.context.tsx) for real-time quotes and alert evaluation. |
-| **Data** | [finnhub.service.ts](src/services/finnhub.service.ts) (REST), [finnhub.socket.ts](src/services/finnhub.socket.ts) (WebSocket). Token from env. |
+| **Data** | UI never talks to `axios` or raw sockets directly. Screens and components consume data via [finnhub.service.ts](src/services/finnhub.service.ts) (REST helpers like `getQuote`, `getSymbolDescriptions`, `searchSymbolsRemote`) and the hooks/utilities exposed by [LivePricesProvider](src/store/live-prices.context.tsx) (e.g. `useQuotesForSymbols`, `usePriceHistoryForSymbols`, `useSetExtraSymbols`). Finnhub token comes from env. |
 | **i18n** | [src/languages/i18n/index.ts](src/languages/i18n/index.ts): i18next; locale from MMKV or device. Locales in [src/languages/locales/](src/languages/locales/) (en, es). |
+---
+
+## Services and data access
+
+- **Finnhub REST (`finnhub.service.ts`)**
+  - Use exported helpers such as `getQuote(symbol)`, `getSymbolDescriptions(symbols)`, and `searchSymbolsRemote(query, exchange?)` from `src/services/finnhub.service.ts`.
+  - Examples: `HomeScreen` and `ChartsScreen` resolve watchlist symbols to company names via `getSymbolDescriptions`, and `CreateAlertScreen` uses `searchSymbolsRemote` and `getQuote` for symbol search and current price.
+  - **Guideline**: do **not** call Finnhub endpoints or create new `axios` clients directly in screens; add or reuse helpers in `finnhub.service.ts` instead (centralizes caching, pagination, and error handling).
+
+- **Live prices and WebSocket (`LivePricesProvider`)**
+  - For real-time data, use the hooks/utilities exported from `src/store/live-prices.context.tsx` / `live-prices.refs.ts`, for example:
+    - `useQuotesForSymbols(symbols: string[])` – latest quotes per symbol (watchlist, alerts list, etc.).
+    - `usePriceHistoryForSymbols(symbols: string[])` – history series for charts.
+    - `useSetExtraSymbols()` – register extra symbols that should receive live updates even if they are not yet in the persistent watchlist (e.g. the symbol currently edited in `CreateAlertScreen`).
+  - **Guideline**: do **not** subscribe/unsubscribe to the WebSocket manually from UI. `LivePricesProvider` manages `finnhub.socket`; UI should only declare which symbols it cares about and read data via these hooks.
+
+This pattern keeps networking, caching, and socket management centralized so UI code remains declarative and easier to test.
 
 ---
 

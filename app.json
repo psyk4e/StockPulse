@@ -1,0 +1,81 @@
+{
+  "expo": {
+    "name": "StockPulse",
+    "slug": "stock-pulse",
+    "version": "1.0.0",
+    "scheme": "auth0stockpulse",
+    "newArchEnabled": true,
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fff",
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#0D0D1A"
+          },
+          "imageWidth": 200
+        }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "PORTRAIT_UP"
+        }
+      ],
+      [
+        "react-native-auth0",
+        {
+          "domain": "dev-60omqslpavccy55t.us.auth0.com",
+          "customScheme": "auth0stockpulse"
+        }
+      ],
+      "expo-font",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "color": "#2196F3",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "owner": "psyk4e",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.psyk4e.stockpulse",
+      "icon": "./assets/icon.icon"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff",
+        "statusBarColor": "#eaeaea"
+      },
+      "package": "com.psyk4e.stockpulse"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2ebe30c4-7560-4d13-a1d1-6c8e4e37cd34"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2ebe30c4-7560-4d13-a1d1-6c8e4e37cd34"
+    }
+  }
+}

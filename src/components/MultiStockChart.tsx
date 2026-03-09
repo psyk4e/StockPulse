@@ -68,10 +68,7 @@ export function MultiStockChart({
 
   const chartWidth = widthProp ?? Math.max(0, containerWidth - Y_AXIS_LABEL_WIDTH);
   const dataSetSource = dataSetsProp ?? DUMMY_DATA_SETS;
-  const dataPointCount = Math.max(
-    1,
-    ...dataSetSource.map((s) => s.data?.length ?? 0)
-  );
+  const dataPointCount = Math.max(1, ...dataSetSource.map((s) => s.data?.length ?? 0));
   const spacing =
     chartWidth > 0 && dataPointCount > 1 ? (chartWidth - 16) / (dataPointCount - 1) : 0;
 
@@ -79,15 +76,14 @@ export function MultiStockChart({
     const s = series as ChartDataSet;
     return {
       data: (s.data ?? []).map((point) => ({ value: point.value, label: point.label })),
-      color:
-        s.color ?? CHART_LINE_COLORS[index % CHART_LINE_COLORS.length],
-    thickness: 2,
-    curved: true,
-    areaChart: true,
-    startOpacity: 0.3,
-    endOpacity: 0.05,
-    hideDataPoints: true,
-  };
+      color: s.color ?? CHART_LINE_COLORS[index % CHART_LINE_COLORS.length],
+      thickness: 2,
+      curved: true,
+      areaChart: true,
+      startOpacity: 0.3,
+      endOpacity: 0.05,
+      hideDataPoints: true,
+    };
   });
 
   const isCustomData = dataSetsProp != null && dataSetsProp.length > 0;
@@ -95,8 +91,7 @@ export function MultiStockChart({
   const maxVal = allValues.length > 0 ? Math.max(...allValues) : 15;
   const minVal = allValues.length > 0 ? Math.min(...allValues) : -5;
   const maxValue = isCustomData && maxVal > minVal ? maxVal + (maxVal - minVal) * 0.1 : 15;
-  const mostNegativeValue =
-    isCustomData && minVal < maxVal ? minVal - (maxVal - minVal) * 0.1 : -5;
+  const mostNegativeValue = isCustomData && minVal < maxVal ? minVal - (maxVal - minVal) * 0.1 : -5;
   const step = Math.ceil((maxValue - mostNegativeValue) / 4) || 5;
 
   const backgroundColor = isDarkMode ? THEME.colors.darkCard : THEME.colors.lightCard;

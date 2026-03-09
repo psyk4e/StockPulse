@@ -26,6 +26,16 @@ export interface PaginatedSymbolsResult {
   pageSize: number;
 }
 
+export interface SymbolLookupResponse {
+  count: number;
+  result: StockSymbol[];
+}
+
+export interface SymbolLookupResult {
+  items: StockSymbol[];
+  total: number;
+}
+
 const client = axios.create({
   baseURL: FINNHUB.BASE_URL,
   params: { token: FINNHUB.TOKEN },
@@ -33,6 +43,15 @@ const client = axios.create({
 });
 
 let symbolsCache: { exchange: string; list: StockSymbol[] } | null = null;
+
+type SearchCacheEntry = { ts: number; result: StockSymbol[] };
+const searchCache: Record<string, SearchCacheEntry> = {};
+const SEARCH_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const SEARCH_MAX_RESULTS = 300;
+
+function buildSearchKey(query: string, exchange: string): string {
+  return `${exchange.toUpperCase()}::${query.trim().toLowerCase()}`;
+}
 
 async function ensureSymbolsCache(exchange: string): Promise<StockSymbol[]> {
   if (symbolsCache?.exchange === exchange) {
@@ -58,6 +77,10 @@ const DEFAULT_PAGE_SIZE = 50;
 /**
  * Returns a paginated slice of stock symbols for the exchange.
  * Full list is fetched once and cached; subsequent calls use the cache.
+ *
+ * NOTE: Este helper existe solo para utilidades internas puntuales.
+ * No debe usarse para autocompletado interactivo en la UI.
+ * Para búsquedas dinámicas, usar `searchSymbolsRemote`.
  */
 export async function getStockSymbolsPage(
   exchange: string = 'US',
@@ -75,6 +98,9 @@ export async function getStockSymbolsPage(
 /**
  * Search symbols by query (symbol or description) and return a paginated result.
  * Uses cached symbol list; filters then paginates.
+ *
+ * NOTE: Este método también depende del listado masivo `/stock/symbol`.
+ * No debe usarse para búsquedas en tiempo real del usuario; preferir `searchSymbolsRemote`.
  */
 export async function searchStockSymbols(
   query: string,
@@ -97,6 +123,39 @@ export async function searchStockSymbols(
   const end = start + pageSize;
   const items = filtered.slice(start, end);
   return { items, total, page, pageSize };
+}
+
+/**
+ * Remote search using Finnhub `/search` endpoint.
+ * Always scoped to the given exchange (defaults to US) and cached per query.
+ * This is the preferred API for interactive symbol search in the UI.
+ */
+export async function searchSymbolsRemote(
+  query: string,
+  exchange: string = 'US'
+): Promise<SymbolLookupResult> {
+  const q = query.trim();
+  if (q === '') {
+    return { items: [], total: 0 };
+  }
+
+  const key = buildSearchKey(q, exchange);
+  const now = Date.now();
+  const cached = searchCache[key];
+  if (cached && now - cached.ts <= SEARCH_TTL_MS) {
+    const items = cached.result.slice(0, SEARCH_MAX_RESULTS);
+    return { items, total: items.length };
+  }
+
+  const { data } = await client.get<SymbolLookupResponse>('/search', {
+    params: { q, exchange },
+  });
+
+  const list = Array.isArray(data?.result) ? data.result : [];
+  const trimmed = list.slice(0, SEARCH_MAX_RESULTS);
+  searchCache[key] = { ts: now, result: trimmed };
+
+  return { items: trimmed, total: data?.count ?? trimmed.length };
 }
 
 /**

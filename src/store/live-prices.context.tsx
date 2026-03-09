@@ -102,6 +102,7 @@ export function LivePricesProvider({ children }: { children: React.ReactNode }) 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restFallbackRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const symbols = useWatchlistStore((s) => s.symbols);
+  const alerts = useAlertsStore((s) => s.alerts);
   const markTriggered = useAlertsStore((s) => s.markTriggered);
   const subscribedRef = useRef<Set<string>>(new Set());
 
@@ -165,7 +166,12 @@ export function LivePricesProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   useEffect(() => {
-    const next = new Set([...symbols, ...extraSymbols]);
+    const activeAlertSymbols = alerts
+      .filter((a) => a.enabled && !a.triggeredAt)
+      .map((a) => a.symbol.toUpperCase().trim())
+      .filter(Boolean);
+
+    const next = new Set([...symbols, ...extraSymbols, ...activeAlertSymbols]);
     const current = new Set(getSubscribedSymbols());
 
     for (const s of current) {
@@ -199,7 +205,7 @@ export function LivePricesProvider({ children }: { children: React.ReactNode }) 
       if (next.has(s)) subscribedRef.current.add(s);
     }
     subscribedRef.current = new Set(next);
-  }, [symbols, extraSymbols]);
+  }, [symbols, extraSymbols, alerts]);
 
   // When socket is not working, refresh from REST so chart and prices still update
   useEffect(() => {

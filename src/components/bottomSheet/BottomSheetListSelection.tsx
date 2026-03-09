@@ -35,6 +35,8 @@ export interface BottomSheetListSelectionProps<T = string> {
   onEndReached?: () => void;
   /** When true, show a loading indicator instead of empty list. */
   loading?: boolean;
+  index?: number;
+  enableDynamicSizing?: boolean;
 }
 
 function ListHeaderView({
@@ -82,6 +84,8 @@ export const BottomSheetListSelection = forwardRef<BottomSheetModal, BottomSheet
       onSearchChange: onSearchChangeProp,
       onEndReached,
       loading = false,
+      index = 0,
+      enableDynamicSizing = false,
     },
     ref
   ) {
@@ -159,6 +163,8 @@ export const BottomSheetListSelection = forwardRef<BottomSheetModal, BottomSheet
         onDismiss={onClose}
         backgroundStyle={{ backgroundColor }}
         backdropComponent={BottomSheetBackdrop}
+        index={index}
+        enableDynamicSizing={enableDynamicSizing}
         topInset={insets.top}>
         <FlashList
           data={filteredItems}

@@ -23,7 +23,7 @@ import { BottomSheetError } from '@/components/bottomSheet/BottomSheetError';
 import { SafeAreaView } from '@/components/SafeAreaView';
 import { KeyboardAvoidingView } from '@/components/KeyboardAvoidingView';
 import { StatusBar } from '@/components/StatusBar';
-import { getQuote, searchStockSymbols } from '@/services/finnhub.service';
+import { getQuote, searchSymbolsRemote } from '@/services/finnhub.service';
 import { useAlertsStore } from '@/store/alerts.store';
 import { useWatchlistStore } from '@/store/watchlist.store';
 import { useSetExtraSymbols } from '@/store/live-prices.context';
@@ -47,11 +47,8 @@ export default function CreateAlertScreen() {
   const addAlert = useAlertsStore((s) => s.addAlert);
   const addSymbol = useWatchlistStore((s) => s.addSymbol);
 
-  const PAGE_SIZE = 50;
   const [stockOptions, setStockOptions] = useState<ListSelectionItem[]>([]);
   const [stockSearchQuery, setStockSearchQuery] = useState('');
-  const [stockPage, setStockPage] = useState(1);
-  const [stockHasMore, setStockHasMore] = useState(true);
   const [stockLoading, setStockLoading] = useState(false);
   const [selectedStock, setSelectedStock] = useState<StockOption | null>(null);
   const [targetPrice, setTargetPrice] = useState('');
@@ -62,13 +59,18 @@ export default function CreateAlertScreen() {
   const listSelectionRef = useRef<BottomSheetModal>(null);
   const successRef = useRef<BottomSheetModal>(null);
   const errorRef = useRef<BottomSheetModal>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const loadStockPage = useCallback(
-    (query: string, page: number, append: boolean) => {
-      if (stockLoading) return;
-      setStockLoading(true);
-      searchStockSymbols(query, 'US', page, PAGE_SIZE)
-        .then(({ items, total }) => {
+  const runStockSearch = useCallback((query: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    const trimmed = query.trim();
+    setStockLoading(true);
+    // pequeño debounce para evitar excesivas llamadas mientras el usuario escribe
+    searchTimeoutRef.current = setTimeout(() => {
+      searchSymbolsRemote(trimmed, 'US')
+        .then(({ items }) => {
           const seen = new Set<string>();
           const options: ListSelectionItem[] = items
             .filter((s) => {
@@ -80,44 +82,40 @@ export default function CreateAlertScreen() {
               label: `${s.symbol} - ${s.description ?? s.symbol}`,
               value: s.symbol,
             }));
-          setStockOptions((prev) => (append ? [...prev, ...options] : options));
-          setStockHasMore((page - 1) * PAGE_SIZE + options.length < total);
+          setStockOptions(options);
         })
         .catch(() => {
-          if (!append) setStockOptions([]);
-          setStockHasMore(false);
+          setStockOptions([]);
         })
-        .finally(() => setStockLoading(false));
-    },
-    [PAGE_SIZE, stockLoading]
-  );
+        .finally(() => {
+          setStockLoading(false);
+        });
+    }, 200);
+  }, []);
 
   const handleStockSearchChange = useCallback(
     (text: string) => {
       setStockSearchQuery(text);
-      setStockPage(1);
-      loadStockPage(text, 1, false);
+      if (text.trim().length === 0) {
+        // limpiar resultados cuando no hay query
+        setStockOptions([]);
+        setStockLoading(false);
+        return;
+      }
+      runStockSearch(text);
     },
-    [loadStockPage]
+    [runStockSearch]
   );
-
-  const handleStockEndReached = useCallback(() => {
-    if (!stockHasMore || stockLoading) return;
-    const nextPage = stockPage + 1;
-    setStockPage(nextPage);
-    loadStockPage(stockSearchQuery, nextPage, true);
-  }, [stockHasMore, stockLoading, stockPage, stockSearchQuery, loadStockPage]);
 
   const openStockPicker = useCallback(() => {
     Haptics.selectionAsync();
-    if (stockOptions.length === 0 && !stockLoading) {
-      loadStockPage('', 1, false);
-      setStockSearchQuery('');
-      setStockPage(1);
-      setStockHasMore(true);
+    // cuando el usuario abre el dropdown, si ya hay texto de búsqueda,
+    // disparamos automáticamente la búsqueda y mostramos loading
+    if (stockSearchQuery.trim().length > 0 && stockOptions.length === 0 && !stockLoading) {
+      runStockSearch(stockSearchQuery);
     }
     listSelectionRef.current?.present();
-  }, [stockOptions.length, stockLoading, loadStockPage]);
+  }, [stockOptions.length, stockLoading, stockSearchQuery, runStockSearch]);
 
   const handleSelectStock = useCallback((item: ListSelectionItem) => {
     setSelectedStock({ symbol: String(item.value), label: item.label });
@@ -368,11 +366,11 @@ export default function CreateAlertScreen() {
           items={stockOptions}
           selectedValue={selectedValue}
           onSelect={handleSelectStock}
+          snapPoints={['80%']}
           showSearch
           searchPlaceholder={t('createAlert.searchStocksPlaceholder')}
           searchQuery={stockSearchQuery}
           onSearchChange={handleStockSearchChange}
-          onEndReached={handleStockEndReached}
           loading={stockLoading}
         />
         <BottomSheetSuccess

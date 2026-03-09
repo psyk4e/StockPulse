@@ -9,10 +9,8 @@ import { Text } from '@/components/Text';
 import { StatusBar } from '@/components/StatusBar';
 import { useTheme } from '@react-navigation/native';
 import { Header, CardAssets, Chip, MultiStockChart } from '@/components';
-import type { ChartDataSet } from '@/components/MultiStockChart';
 import { useAppColorScheme } from '@/store/preferences.context';
 import { useWatchlistStore } from '@/store/watchlist.store';
-import { usePriceHistoryForSymbols } from '@/store/live-prices.context';
 import { getSymbolDescriptions } from '@/services/finnhub.service';
 
 const TIMEFRAME_OPTIONS = ['1D', '1W', '1M', '3M', '1Y', 'ALL'] as const;
@@ -27,7 +25,6 @@ export default function ChartsScreen() {
   const { t } = useTranslation();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1M');
   const symbols = useWatchlistStore((s) => s.symbols);
-  const priceHistory = usePriceHistoryForSymbols(symbols);
   const [symbolToName, setSymbolToName] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -55,17 +52,6 @@ export default function ChartsScreen() {
       })),
     [symbols, symbolToName]
   );
-
-  const chartDataSets = useMemo((): ChartDataSet[] => {
-    return symbols.map((symbol, index) => {
-      const series = priceHistory[symbol];
-      const data = (series ?? []).map((p) => ({ value: p.value, label: p.label }));
-      return {
-        data: data.length > 0 ? data : [{ value: 0 }],
-        color: CHART_LINE_COLORS[index % CHART_LINE_COLORS.length],
-      };
-    });
-  }, [symbols, priceHistory]);
 
   const renderAssetItem = useCallback(
     ({ item }: { item: (typeof listData)[number] }) => (
@@ -111,7 +97,6 @@ export default function ChartsScreen() {
         <MultiStockChart
           height={180}
           containerStyle={styles.chartContainer}
-          dataSets={chartDataSets.length > 0 ? chartDataSets : undefined}
         />
         <Text font="semiBold" style={styles.sectionTitle}>
           {t('charts.trackedAssets')}
@@ -129,7 +114,6 @@ export default function ChartsScreen() {
       styles.chartSubtitle,
       styles.chartContainer,
       styles.sectionTitle,
-      chartDataSets,
     ]
   );
 

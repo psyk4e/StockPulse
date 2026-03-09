@@ -1,14 +1,32 @@
-import { DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { useColorScheme } from 'react-native';
 import { useMemo } from 'react';
 
 import 'react-native-gesture-handler';
 
-import Navigation from './navigation';
+import Navigation from './src/navigation';
+import { darkTheme, lightTheme } from '@/utils/theme.utils';
+import { RootProvider } from '@/providers/index.provider';
+import { useEffectiveColorScheme } from '@/store/preferences.store';
+import { AuthProvider, useAuth } from '@/store/auth.context';
+import { AuthLoadingScreen } from '@/components/AuthLoadingScreen';
 
-export default function App() {
-  const colorScheme = useColorScheme();
-  const theme = useMemo(() => (colorScheme === 'dark' ? DarkTheme : DefaultTheme), [colorScheme]);
+function AppNavigation() {
+  const colorScheme = useEffectiveColorScheme();
+  const theme = useMemo(() => (colorScheme === 'dark' ? darkTheme : lightTheme), [colorScheme]);
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <AuthLoadingScreen />;
+  }
 
   return <Navigation theme={theme} />;
+}
+
+export default function App() {
+  return (
+    <RootProvider>
+      <AuthProvider>
+        <AppNavigation />
+      </AuthProvider>
+    </RootProvider>
+  );
 }

@@ -13,7 +13,6 @@ import { Text } from '@/components/Text';
 import { Button } from '@/components/buttons/Button';
 import { TextInput } from '@/components/inputs/TextInput';
 import { Icon } from '@/components/Icon';
-import { ChipWithX } from '@/components/chips/ChipWithX';
 import {
   BottomSheetListSelection,
   ListSelectionItem,
@@ -250,17 +249,11 @@ export default function CreateAlertScreen() {
             <Pressable style={styles.stockInputRow} onPress={openStockPicker}>
               <View style={styles.stockInputLeft}>{searchIcon}</View>
               <View style={styles.stockInputContent}>
-                {selectedStock ? (
-                  <ChipWithX
-                    label={selectedStock.label}
-                    selected
-                    onRemove={handleRemoveStock}
-                    containerStyle={styles.chip}
-                  />
-                ) : null}
                 <Text
                   variant="Secondary"
-                  title={selectedStock ? '' : t('createAlert.searchStocksPlaceholder')}
+                  title={
+                    selectedStock ? selectedStock.label : t('createAlert.searchStocksPlaceholder')
+                  }
                   textStyle={styles.placeholder}
                 />
               </View>

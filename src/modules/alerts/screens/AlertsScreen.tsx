@@ -40,9 +40,15 @@ export default function AlertsScreen() {
     });
   }, [alerts, quotes]);
 
-  const handleCreateAlert = useCallback(() => {
-    navigation.navigate('Stacknavigator', { screen: 'CreateAlert' });
-  }, [navigation]);
+  const handleEditAlert = useCallback(
+    (id: string) => {
+      navigation.navigate('Stacknavigator', {
+        screen: 'CreateAlert',
+        params: { alertId: id },
+      });
+    },
+    [navigation]
+  );
 
   const handleToggleEnabled = useCallback(
     (id: string, value: boolean) => {
@@ -60,10 +66,11 @@ export default function AlertsScreen() {
         currentOrTriggered={item.currentOrTriggered}
         value={item.enabled}
         onValueChange={(value) => handleToggleEnabled(item.id, value)}
+        onPress={() => handleEditAlert(item.id)}
         containerStyle={styles.cardItem}
       />
     ),
-    [handleToggleEnabled, styles.cardItem]
+    [handleToggleEnabled, handleEditAlert, styles.cardItem]
   );
 
   const keyExtractor = useCallback((item: (typeof listData)[number]) => item.id, []);

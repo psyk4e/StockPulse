@@ -2,7 +2,8 @@ import React from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@react-navigation/native';
+import { useTheme, useRoute, type RouteProp, useNavigation } from '@react-navigation/native';
+import type { StackNavigatorParamList } from '@/navigation/stack-navigator';
 import { useAppColorScheme } from '@/store/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
@@ -26,9 +27,13 @@ export default function CreateAlertScreen() {
   const { t } = useTranslation();
   const colorScheme = useAppColorScheme();
   const theme = useTheme();
+  const route = useRoute<RouteProp<StackNavigatorParamList, 'CreateAlert'>>();
   const isDarkMode = getIsDarkMode(colorScheme);
   const styles = getStyles(isDarkMode);
+  const navigation = useNavigation();
 
+  const initialSymbol = route.params?.initialSymbol;
+  const alertId = route.params?.alertId;
   const {
     stockOptions,
     stockSearchQuery,
@@ -54,11 +59,17 @@ export default function CreateAlertScreen() {
     targetPriceValidationError,
     selectedValue,
     descriptionKey,
-  } = useCreateAlert();
+    isEditMode,
+  } = useCreateAlert(alertId, initialSymbol);
 
   const iconColor = isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight;
   const dollarIcon = <Text style={[styles.dollarIcon, { color: iconColor }]}>$</Text>;
   const searchIcon = <Icon name="search" size={20} color={iconColor} />;
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isEditMode ? t('createAlert.editTitle') : t('createAlert.title'),
+    });
+  }, [navigation, t, isEditMode]);
 
   return (
     <View style={styles.container}>
@@ -71,7 +82,7 @@ export default function CreateAlertScreen() {
       />
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <Header
-          title={t('createAlert.title')}
+          title={isEditMode ? t('createAlert.editTitle') : t('createAlert.title')}
           titleAlign="center"
           titleStyle={{ fontSize: 16 }}
           leftElement={<BackButton onPress={goBack} />}
@@ -190,7 +201,9 @@ export default function CreateAlertScreen() {
               <Text
                 font="semiBold"
                 style={[styles.buttonText, !isFormValid && styles.buttonTextDisabled]}>
-                {t('createAlert.createAlertButton')}
+                {isEditMode
+                  ? t('createAlert.updateAlertButton')
+                  : t('createAlert.createAlertButton')}
               </Text>
             </Button>
           </View>
@@ -212,11 +225,15 @@ export default function CreateAlertScreen() {
         <BottomSheetSuccess
           ref={successRef}
           snapPoints={['40%']}
-          title={t('createAlert.successTitle')}
-          message={t('createAlert.successMessage', {
-            symbol: selectedStock?.symbol ?? '—',
-            price: targetPrice || '0',
-          })}
+          title={isEditMode ? t('createAlert.updatedTitle') : t('createAlert.successTitle')}
+          message={
+            isEditMode
+              ? t('createAlert.updatedMessage')
+              : t('createAlert.successMessage', {
+                  symbol: selectedStock?.symbol ?? '—',
+                  price: targetPrice || '0',
+                })
+          }
           buttonTitle={t('createAlert.successDone')}
           onButtonPress={handleSuccessClose}
           onClose={handleSuccessClose}

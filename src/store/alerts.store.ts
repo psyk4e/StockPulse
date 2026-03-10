@@ -43,11 +43,14 @@ function generateId(): string {
   return `alert_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
+export type AlertUpdatePatch = Partial<Omit<Alert, 'id'>>;
+
 export interface AlertsState {
   alerts: Alert[];
   addAlert: (alert: Omit<Alert, 'id' | 'enabled'> & { enabled?: boolean }) => boolean;
   removeAlert: (id: string) => void;
-  updateAlert: (id: string, patch: Partial<Pick<Alert, 'enabled' | 'triggeredAt'>>) => void;
+  /** Returns false if update would create a duplicate (same symbol+price+direction on another alert). */
+  updateAlert: (id: string, patch: AlertUpdatePatch) => boolean;
   markTriggered: (id: string) => void;
   clear: () => void;
 }
@@ -84,11 +87,40 @@ export const useAlertsStore = create<AlertsState>((set, get) => ({
   },
 
   updateAlert: (id, patch) => {
-    const next = get().alerts.map((a) =>
-      a.id === id ? { ...a, ...patch } : a
-    );
+    const current = get().alerts;
+    const existing = current.find((a) => a.id === id);
+    if (!existing) return false;
+
+    const symbol =
+      patch.symbol !== undefined ? patch.symbol.toUpperCase().trim() : existing.symbol;
+    const priceThreshold = patch.priceThreshold ?? existing.priceThreshold;
+    const direction = patch.direction ?? existing.direction;
+
+    const hasPayloadChange =
+      patch.symbol !== undefined ||
+      patch.priceThreshold !== undefined ||
+      patch.direction !== undefined;
+
+    if (hasPayloadChange) {
+      const duplicate = current.some(
+        (a) =>
+          a.id !== id &&
+          a.symbol === symbol &&
+          a.priceThreshold === priceThreshold &&
+          a.direction === direction
+      );
+      if (duplicate) return false;
+    }
+
+    const merged: Alert = {
+      ...existing,
+      ...patch,
+      ...(patch.symbol !== undefined && { symbol }),
+    };
+    const next = current.map((a) => (a.id === id ? merged : a));
     persist(next);
     set({ alerts: next });
+    return true;
   },
 
   markTriggered: (id) => {

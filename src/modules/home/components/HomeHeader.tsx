@@ -7,10 +7,12 @@ import { THEME } from '@/utils/theme.utils';
 import { Header } from '@/components/Header';
 import { Text } from '@/components/Text';
 import { Logo } from '@/components/Logo';
+import { useAuth } from '@/store/auth.context';
 
 const AVATAR_SIZE = 36;
 
 export function HomeHeader() {
+  const { user } = useAuth();
   const colorScheme = useAppColorScheme();
   const isDarkMode = getIsDarkMode(colorScheme);
   const { t } = useTranslation();
@@ -27,7 +29,7 @@ export function HomeHeader() {
           textStyle={styles.liveInsights}
         />
         <Text
-          title={t('home.greeting')}
+          title={t('home.greeting', { name: user?.name })}
           variant="Primary"
           font="bold"
           textStyle={styles.greeting}

@@ -7,6 +7,7 @@ import { useLoadFont } from '@/hooks/useTheme';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ColorSchemeProvider } from '@/store/preferences.context';
 import { LivePricesProvider } from '@/store/live-prices.context';
+import { MarketStatusProvider } from '@/store/market-status.context';
 import {
   requestNotificationPermissions,
 } from '@/config/notifications';
@@ -30,11 +31,13 @@ export function RootProvider(props: Props) {
     <SafeAreaProvider>
       <ColorSchemeProvider>
         <LivePricesProvider>
+        <MarketStatusProvider>
         <GestureHandlerRootView>
           <KeyboardProvider>
             <BottomSheetModalProvider>{props.children}</BottomSheetModalProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>
+        </MarketStatusProvider>
         </LivePricesProvider>
       </ColorSchemeProvider>
     </SafeAreaProvider>

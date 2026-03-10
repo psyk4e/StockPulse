@@ -24,6 +24,17 @@ export interface SymbolLookupResponse {
   result: StockSymbol[];
 }
 
+export type MarketStatusSession = 'pre-market' | 'regular' | 'post-market';
+
+export interface MarketStatusResponse {
+  exchange: string;
+  holiday: string | null;
+  isOpen: boolean;
+  session: MarketStatusSession | null;
+  timezone: string;
+  t: number;
+}
+
 const client = axios.create({
   baseURL: FINNHUB.BASE_URL,
   params: { token: FINNHUB.TOKEN },
@@ -52,4 +63,11 @@ export async function searchRemote(
     params: { q: query.trim(), exchange },
   });
   return data ?? { count: 0, result: [] };
+}
+
+export async function getMarketStatus(exchange: string): Promise<MarketStatusResponse> {
+  const { data } = await client.get<MarketStatusResponse>('/stock/market-status', {
+    params: { exchange },
+  });
+  return data;
 }

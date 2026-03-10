@@ -1,7 +1,7 @@
 import type { StockSymbol } from './finnhub.api';
 import * as finnhubApi from './finnhub.api';
 
-export type { QuoteResponse, StockSymbol } from './finnhub.api';
+export type { QuoteResponse, StockSymbol, MarketStatusResponse, MarketStatusSession } from './finnhub.api';
 
 export interface PaginatedSymbolsResult {
   items: StockSymbol[];
@@ -181,6 +181,10 @@ export async function getSymbolDescriptions(
 
 export async function getQuote(symbol: string) {
   return finnhubApi.getQuote(symbol);
+}
+
+export async function getMarketStatus(exchange: string = 'US') {
+  return finnhubApi.getMarketStatus(exchange);
 }
 
 export { finnhubService };

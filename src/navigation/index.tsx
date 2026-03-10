@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '@modules/login/screens/LoginScreen';
 import { useIsSignedIn, useIsSignedOut } from '@/store/auth.context';
 import TabNavigator from './tab-navigator';
-import StackNavigator from './stack-navigator';
+import StackNavigator, { type StackNavigatorParamList } from './stack-navigator';
 
 const RootStack = createNativeStackNavigator({
   screenOptions: { headerShown: false },
@@ -30,8 +30,12 @@ type RootNavigatorParamList = StaticParamList<typeof RootStack>;
 
 declare global {
   namespace ReactNavigation {
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    interface RootParamList extends RootNavigatorParamList {}
+    interface RootParamList extends RootNavigatorParamList {
+      Stacknavigator?: {
+        screen: keyof StackNavigatorParamList;
+        params?: StackNavigatorParamList[keyof StackNavigatorParamList];
+      };
+    }
   }
 }
 

@@ -220,10 +220,10 @@ This pattern keeps networking, caching, and socket management centralized so UI 
 - [ ] **Monitoring**: Sentry
 - [ ] **Commit lint**: Husky
 - [ ] **Import sorting**: `@trivago/prettier-plugin-sort-imports`
-- [ ] **Husky** (optional, senior-level)
+- [ ] **Husky**
 - [ ] **lint-staged**
 - [ ] **Offline support**: Latest data when user closes the app and does not restore connection
-- [ ] **EAS Update**: Set up EAS Update for over-the-air updates to deliver new features and bug fixes without a full app store release.
+- [x] **EAS Update**: Set up EAS Update for over-the-air updates to deliver new features and bug fixes without a full app store release.
 
 ---
 

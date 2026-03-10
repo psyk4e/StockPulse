@@ -55,6 +55,8 @@ export const en = {
     errorMessage: "We couldn't create your alert. Please check your connection and try again.",
     errorSelectStock: "Please select a stock first.",
     errorInvalidPrice: "Please enter a valid target price (positive number).",
+    errorTargetMustBeAboveCurrent: "Target price must be above current price (${{price}}).",
+    errorTargetMustBeBelowCurrent: "Target price must be below current price (${{price}}).",
     errorDuplicate: "An alert for this stock and price already exists.",
     errorTryAgain: "Try Again",
     errorDismiss: "Dismiss",

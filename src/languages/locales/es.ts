@@ -56,6 +56,8 @@ export const es = {
     errorMessage: "No pudimos crear tu alerta. Comprueba la conexión e inténtalo de nuevo.",
     errorSelectStock: "Selecciona una acción primero.",
     errorInvalidPrice: "Introduce un precio objetivo válido (número positivo).",
+    errorTargetMustBeAboveCurrent: "El precio objetivo debe ser mayor que el precio actual (${{price}}).",
+    errorTargetMustBeBelowCurrent: "El precio objetivo debe ser menor que el precio actual (${{price}}).",
     errorDuplicate: "Ya existe una alerta para esta acción y precio.",
     errorTryAgain: "Reintentar",
     errorDismiss: "Cerrar",

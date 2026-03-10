@@ -1,9 +1,8 @@
-import React, { useRef, useCallback, useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import React from 'react';
+import { View, ScrollView, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useTheme } from '@react-navigation/native';
 import { useAppColorScheme } from '@/store/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
@@ -13,208 +12,49 @@ import { Text } from '@/components/Text';
 import { Button } from '@/components/buttons/Button';
 import { TextInput } from '@/components/inputs/TextInput';
 import { Icon } from '@/components/Icon';
-import {
-  BottomSheetListSelection,
-  ListSelectionItem,
-} from '@/components/bottomSheet/BottomSheetListSelection';
+import { BottomSheetListSelection } from '@/components/bottomSheet/BottomSheetListSelection';
 import { BottomSheetSuccess } from '@/components/bottomSheet/BottomSheetSuccess';
 import { BottomSheetError } from '@/components/bottomSheet/BottomSheetError';
 import { SafeAreaView } from '@/components/SafeAreaView';
 import { KeyboardAvoidingView } from '@/components/KeyboardAvoidingView';
 import { StatusBar } from '@/components/StatusBar';
-import { getQuote, searchSymbolsRemote } from '@/services/finnhub.service';
-import { useAlertsStore } from '@/store/alerts.store';
-import { useWatchlistStore } from '@/store/watchlist.store';
-import { useSetExtraSymbols } from '@/store/live-prices.context';
-import type { LiveQuote } from '@/store/live-prices.types';
 import { LivePriceDisplay } from '@/components/LivePriceDisplay';
-
-type AlertType = 'above' | 'below';
-
-interface StockOption {
-  symbol: string;
-  label: string;
-}
+import { useCreateAlert } from '../hooks/useCreateAlert';
+import { getStyles } from '../styles/createAlert.style';
 
 export default function CreateAlertScreen() {
+  const { t } = useTranslation();
   const colorScheme = useAppColorScheme();
   const theme = useTheme();
   const isDarkMode = getIsDarkMode(colorScheme);
   const styles = getStyles(isDarkMode);
-  const { t } = useTranslation();
-  const navigation = useNavigation();
-  const addAlert = useAlertsStore((s) => s.addAlert);
-  const addSymbol = useWatchlistStore((s) => s.addSymbol);
 
-  const [stockOptions, setStockOptions] = useState<ListSelectionItem[]>([]);
-  const [stockSearchQuery, setStockSearchQuery] = useState('');
-  const [stockLoading, setStockLoading] = useState(false);
-  const [selectedStock, setSelectedStock] = useState<StockOption | null>(null);
-  const [targetPrice, setTargetPrice] = useState('');
-  const [alertType, setAlertType] = useState<AlertType>('above');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [quoteFromState, setQuoteFromState] = useState<LiveQuote | null>(null);
-
-  const listSelectionRef = useRef<BottomSheetModal>(null);
-  const successRef = useRef<BottomSheetModal>(null);
-  const errorRef = useRef<BottomSheetModal>(null);
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const runStockSearch = useCallback((query: string) => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    const trimmed = query.trim();
-    setStockLoading(true);
-    // pequeño debounce para evitar excesivas llamadas mientras el usuario escribe
-    searchTimeoutRef.current = setTimeout(() => {
-      searchSymbolsRemote(trimmed, 'US')
-        .then(({ items }) => {
-          const seen = new Set<string>();
-          const options: ListSelectionItem[] = items
-            .filter((s) => {
-              if (seen.has(s.symbol)) return false;
-              seen.add(s.symbol);
-              return true;
-            })
-            .map((s) => ({
-              label: `${s.symbol} - ${s.description ?? s.symbol}`,
-              value: s.symbol,
-            }));
-          setStockOptions(options);
-        })
-        .catch(() => {
-          setStockOptions([]);
-        })
-        .finally(() => {
-          setStockLoading(false);
-        });
-    }, 200);
-  }, []);
-
-  const handleStockSearchChange = useCallback(
-    (text: string) => {
-      setStockSearchQuery(text);
-      if (text.trim().length === 0) {
-        // limpiar resultados cuando no hay query
-        setStockOptions([]);
-        setStockLoading(false);
-        return;
-      }
-      runStockSearch(text);
-    },
-    [runStockSearch]
-  );
-
-  const openStockPicker = useCallback(() => {
-    Haptics.selectionAsync();
-    // cuando el usuario abre el dropdown, si ya hay texto de búsqueda,
-    // disparamos automáticamente la búsqueda y mostramos loading
-    if (stockSearchQuery.trim().length > 0 && stockOptions.length === 0 && !stockLoading) {
-      runStockSearch(stockSearchQuery);
-    }
-    listSelectionRef.current?.present();
-  }, [stockOptions.length, stockLoading, stockSearchQuery, runStockSearch]);
-
-  const handleSelectStock = useCallback((item: ListSelectionItem) => {
-    setSelectedStock({ symbol: String(item.value), label: item.label });
-    listSelectionRef.current?.dismiss();
-  }, []);
-
-  const handleRemoveStock = useCallback(() => {
-    setSelectedStock(null);
-    setQuoteFromState(null);
-  }, []);
-
-  const setExtraSymbols = useSetExtraSymbols();
-  React.useEffect(() => {
-    if (selectedStock?.symbol) {
-      setExtraSymbols([selectedStock.symbol]);
-    } else {
-      setExtraSymbols([]);
-    }
-    return () => setExtraSymbols([]);
-  }, [selectedStock?.symbol, setExtraSymbols]);
-
-  React.useEffect(() => {
-    if (!selectedStock?.symbol) {
-      setQuoteFromState(null);
-      return;
-    }
-    let cancelled = false;
-    getQuote(selectedStock.symbol)
-      .then((res) => {
-        if (cancelled) return;
-        setQuoteFromState({
-          c: res.c,
-          d: res.d,
-          dp: res.dp,
-          h: res.h,
-          l: res.l,
-          o: res.o,
-          pc: res.pc,
-          t: res.t,
-        });
-      })
-      .catch(() => {
-        if (!cancelled) setQuoteFromState(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedStock?.symbol]);
-
-  const targetPriceNum = parseFloat(targetPrice.replace(/,/g, '.')) || 0;
-  const isFormValid = selectedStock != null && !Number.isNaN(targetPriceNum) && targetPriceNum > 0;
-
-  const handleSubmit = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (!selectedStock) {
-      setErrorMessage(t('createAlert.errorSelectStock'));
-      errorRef.current?.present();
-      return;
-    }
-    const num = parseFloat(targetPrice.replace(/,/g, '.'));
-    if (Number.isNaN(num) || num <= 0) {
-      setErrorMessage(t('createAlert.errorInvalidPrice'));
-      errorRef.current?.present();
-      return;
-    }
-    const added = addAlert({
-      symbol: selectedStock.symbol,
-      priceThreshold: num,
-      direction: alertType,
-      enabled: true,
-    });
-    if (added) {
-      addSymbol(selectedStock.symbol);
-      successRef.current?.present();
-    } else {
-      setErrorMessage(t('createAlert.errorDuplicate'));
-      errorRef.current?.present();
-    }
-  }, [selectedStock, targetPrice, alertType, addAlert, addSymbol, t]);
-
-  const goBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
-  const handleSuccessClose = useCallback(() => {
-    successRef.current?.dismiss();
-    navigation.goBack();
-  }, [navigation]);
-
-  const selectedValue = selectedStock?.symbol ?? null;
-  const descriptionKey =
-    alertType === 'above'
-      ? t('createAlert.alertDescriptionAbove', {
-          symbol: selectedStock?.label ?? '—',
-          price: targetPrice || '0',
-        })
-      : t('createAlert.alertDescriptionBelow', {
-          symbol: selectedStock?.label ?? '—',
-          price: targetPrice || '0',
-        });
+  const {
+    stockOptions,
+    stockSearchQuery,
+    stockLoading,
+    selectedStock,
+    targetPrice,
+    setTargetPrice,
+    alertType,
+    setAlertType,
+    errorMessage,
+    quoteFromState,
+    listSelectionRef,
+    successRef,
+    errorRef,
+    handleStockSearchChange,
+    openStockPicker,
+    handleSelectStock,
+    handleSubmit,
+    goBack,
+    handleSuccessClose,
+    dismissError,
+    isFormValid,
+    targetPriceValidationError,
+    selectedValue,
+    descriptionKey,
+  } = useCreateAlert();
 
   const iconColor = isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight;
   const dollarIcon = <Text style={[styles.dollarIcon, { color: iconColor }]}>$</Text>;
@@ -242,7 +82,6 @@ export default function CreateAlertScreen() {
             style={styles.scroll}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled">
-            {/* SELECT STOCK */}
             <Text variant="overline" textStyle={[styles.sectionLabel, styles.sectionLabelFirst]}>
               {t('createAlert.selectStock')}
             </Text>
@@ -270,7 +109,6 @@ export default function CreateAlertScreen() {
               </View>
             )}
 
-            {/* TARGET PRICE */}
             <Text variant="overline" textStyle={styles.sectionLabel}>
               {t('createAlert.targetPrice')}
             </Text>
@@ -283,7 +121,6 @@ export default function CreateAlertScreen() {
               containerStyle={styles.input}
             />
 
-            {/* ALERT TYPE */}
             <Text variant="overline" textStyle={styles.sectionLabel}>
               {t('createAlert.alertType')}
             </Text>
@@ -330,9 +167,15 @@ export default function CreateAlertScreen() {
               </Pressable>
             </View>
             <Text variant="Secondary" title={descriptionKey} textStyle={styles.description} />
+            {targetPriceValidationError != null ? (
+              <Text
+                variant="Secondary"
+                title={targetPriceValidationError}
+                textStyle={styles.validationError}
+              />
+            ) : null}
           </ScrollView>
 
-          {/* CREATE ALERT BUTTON - fixed at bottom */}
           <View style={styles.buttonBottom}>
             <Button
               variant="primary"
@@ -355,11 +198,11 @@ export default function CreateAlertScreen() {
 
         <BottomSheetListSelection
           ref={listSelectionRef}
+          enableDynamicSizing
           title={t('createAlert.selectStockSheetTitle')}
           items={stockOptions}
           selectedValue={selectedValue}
           onSelect={handleSelectStock}
-          snapPoints={['80%']}
           showSearch
           searchPlaceholder={t('createAlert.searchStocksPlaceholder')}
           searchQuery={stockSearchQuery}
@@ -385,157 +228,9 @@ export default function CreateAlertScreen() {
           message={errorMessage || t('createAlert.errorMessage')}
           buttonTitle={t('createAlert.errorTryAgain')}
           secondaryButtonTitle={t('createAlert.errorDismiss')}
-          onClose={() => errorRef.current?.dismiss()}
+          onClose={dismissError}
         />
       </SafeAreaView>
     </View>
   );
-}
-
-function getStyles(isDarkMode: boolean) {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: isDarkMode ? THEME.colors.darkBackground : THEME.colors.white,
-    },
-    safeArea: {
-      flex: 1,
-    },
-    keyboardView: {
-      flex: 1,
-    },
-    scroll: {
-      flex: 1,
-    },
-    scrollContent: {
-      paddingHorizontal: THEME.spacing.screenHorizontal,
-      paddingTop: THEME.spacing.marginVerticalL,
-      paddingBottom: THEME.spacing.marginVerticalL,
-    },
-    sectionLabel: {
-      marginBottom: 10,
-      marginTop: 24,
-      fontWeight: '700',
-    },
-    sectionLabelFirst: {
-      marginTop: 0,
-    },
-    stockInputRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: isDarkMode ? THEME.colors.darkCard : THEME.colors.lightBackground,
-      borderColor: isDarkMode ? THEME.colors.darkBorder : THEME.colors.lightBorder,
-      borderRadius: 12,
-      borderWidth: 1,
-      minHeight: 52,
-    },
-    stockInputLeft: {
-      paddingLeft: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    stockInputContent: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingLeft: 8,
-      paddingRight: 12,
-      paddingVertical: 8,
-      gap: 8,
-    },
-    chip: {
-      alignSelf: 'center',
-    },
-    placeholder: {
-      fontSize: 16,
-    },
-    priceRow: {
-      marginTop: 14,
-      gap: 6,
-    },
-    currentPrice: {
-      fontSize: 28,
-      fontWeight: '700',
-    },
-    changeRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    changeText: {
-      fontSize: 14,
-      fontWeight: '500',
-    },
-    dollarIcon: {
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    input: {
-      marginBottom: 0,
-      backgroundColor: isDarkMode ? THEME.colors.darkCard : THEME.colors.lightBackground,
-      borderColor: isDarkMode ? THEME.colors.darkBorder : THEME.colors.lightBorder,
-      borderRadius: 12,
-    },
-    segmentedRow: {
-      flexDirection: 'row',
-      backgroundColor: isDarkMode ? THEME.colors.darkCard : THEME.colors.white,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: isDarkMode ? THEME.colors.darkBorder : THEME.colors.lightBorder,
-      overflow: 'hidden',
-    },
-    segment: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 16,
-      gap: 8,
-    },
-    segmentActive: {
-      backgroundColor: THEME.colors.primaryBlue,
-    },
-    segmentLabel: {
-      fontSize: 16,
-    },
-    segmentLabelActive: {
-      color: THEME.colors.white,
-    },
-    description: {
-      marginTop: 14,
-      marginBottom: 24,
-      fontSize: 14,
-      lineHeight: 20,
-    },
-    buttonBottom: {
-      paddingHorizontal: 20,
-      paddingTop: 16,
-      paddingBottom: 24,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: isDarkMode ? THEME.colors.darkBorder : THEME.colors.lightBorder,
-      backgroundColor: isDarkMode ? THEME.colors.darkBackground : THEME.colors.lightBackground,
-    },
-    primaryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 10,
-      marginHorizontal: 0,
-      alignSelf: 'stretch',
-      width: '100%',
-    },
-    primaryButtonDisabled: {
-      backgroundColor: THEME.colors.lightGrey,
-      shadowOpacity: 0,
-      elevation: 0,
-    },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: THEME.colors.white,
-    },
-    buttonTextDisabled: {
-      color: THEME.colors.darkGrey,
-    },
-  });
 }

@@ -21,6 +21,8 @@ export { CardSettingsRow } from './cards/CardSettingsRow';
 export type { CardSettingsRowProps, CardSettingsRowRightType } from './cards/CardSettingsRow';
 export { CardWatchlist } from './cards/CardWatchlist';
 export type { CardWatchlistProps } from './cards/CardWatchlist';
+export { MarketStatusCard } from './cards/MarketStatusCard';
+export type { MarketStatusCardProps } from './cards/MarketStatusCard';
 
 // Chip
 export { Chip } from './chips/Chip';

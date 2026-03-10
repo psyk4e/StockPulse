@@ -26,7 +26,9 @@ export type IconName =
   | 'info'
   | 'description'
   | 'shield'
-  | 'check-bold';
+  | 'check-bold'
+  | 'trash'
+  | 'edit';
 
 export interface IconProps extends ViewProps {
   name: IconName;
@@ -80,6 +82,10 @@ const ICON_PATHS: Record<IconName, IconPathDef> = {
   shield:
     'M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z',
   'check-bold': 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  trash:
+    'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+  edit:
+    'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
 };
 
 function IconComponent({ name, size = 24, color = THEME.colors.white, style, ...rest }: IconProps) {

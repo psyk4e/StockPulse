@@ -203,7 +203,7 @@ export default function SettingsScreen() {
 
         <BottomSheet
           ref={dummyModalRef}
-          snapPoints={['80%']}
+          snapPoints={['60%']}
           backdropComponent={BottomSheetBackdrop}>
           <ModalContentDummy variant={dummyModalVariant} />
         </BottomSheet>

@@ -1,23 +1,7 @@
-import axios from 'axios';
-import { FINNHUB } from '@/utils/constant.utils';
+import type { StockSymbol } from './finnhub.api';
+import * as finnhubApi from './finnhub.api';
 
-export interface QuoteResponse {
-  c: number; // current price
-  d: number; // change
-  dp: number; // percent change
-  h: number; // high
-  l: number; // low
-  o: number; // open
-  pc: number; // previous close
-  t: number; // timestamp
-}
-
-export interface StockSymbol {
-  description: string;
-  displaySymbol: string;
-  symbol: string;
-  type: string;
-}
+export type { QuoteResponse, StockSymbol } from './finnhub.api';
 
 export interface PaginatedSymbolsResult {
   items: StockSymbol[];
@@ -26,81 +10,123 @@ export interface PaginatedSymbolsResult {
   pageSize: number;
 }
 
-export interface SymbolLookupResponse {
-  count: number;
-  result: StockSymbol[];
-}
-
 export interface SymbolLookupResult {
   items: StockSymbol[];
   total: number;
 }
 
-const client = axios.create({
-  baseURL: FINNHUB.BASE_URL,
-  params: { token: FINNHUB.TOKEN },
-  timeout: 10000,
-});
-
-let symbolsCache: { exchange: string; list: StockSymbol[] } | null = null;
-
-type SearchCacheEntry = { ts: number; result: StockSymbol[] };
-const searchCache: Record<string, SearchCacheEntry> = {};
-const SEARCH_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const DEFAULT_PAGE_SIZE = 50;
+const SEARCH_TTL_MS = 5 * 60 * 1000;
 const SEARCH_MAX_RESULTS = 300;
 
-function buildSearchKey(query: string, exchange: string): string {
-  return `${exchange.toUpperCase()}::${query.trim().toLowerCase()}`;
-}
+export class FinnhubService {
+  private symbolsCache: { exchange: string; list: StockSymbol[] } | null = null;
+  private searchCache: Record<string, { ts: number; result: StockSymbol[] }> = {};
 
-async function ensureSymbolsCache(exchange: string): Promise<StockSymbol[]> {
-  if (symbolsCache?.exchange === exchange) {
-    return symbolsCache.list;
+  buildSearchKey(query: string, exchange: string): string {
+    return `${exchange.toUpperCase()}::${query.trim().toLowerCase()}`;
   }
-  const { data } = await client.get<StockSymbol[]>('/stock/symbol', {
-    params: { exchange },
-  });
-  const list = data ?? [];
-  symbolsCache = { exchange, list };
-  return list;
+
+  setSymbolsCache(exchange: string, list: StockSymbol[]): void {
+    this.symbolsCache = { exchange, list };
+  }
+
+  getSymbolsCache(exchange: string): StockSymbol[] | null {
+    if (this.symbolsCache?.exchange === exchange) {
+      return this.symbolsCache.list;
+    }
+    return null;
+  }
+
+  getSymbolsPage(
+    exchange: string,
+    page: number = 1,
+    pageSize: number = DEFAULT_PAGE_SIZE
+  ): PaginatedSymbolsResult | null {
+    const list = this.getSymbolsCache(exchange);
+    if (!list) return null;
+    const total = list.length;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const items = list.slice(start, end);
+    return { items, total, page, pageSize };
+  }
+
+  filterSymbols(list: StockSymbol[], query: string): StockSymbol[] {
+    const q = query.trim().toLowerCase();
+    if (q === '') return list;
+    return list.filter(
+      (s) =>
+        s.symbol.toLowerCase().includes(q) ||
+        (s.description ?? '').toLowerCase().includes(q)
+    );
+  }
+
+  searchSymbols(
+    list: StockSymbol[],
+    query: string,
+    page: number = 1,
+    pageSize: number = DEFAULT_PAGE_SIZE
+  ): PaginatedSymbolsResult {
+    const filtered = this.filterSymbols(list, query);
+    const total = filtered.length;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const items = filtered.slice(start, end);
+    return { items, total, page, pageSize };
+  }
+
+  getCachedSearch(key: string): SymbolLookupResult | null {
+    const entry = this.searchCache[key];
+    if (!entry || Date.now() - entry.ts > SEARCH_TTL_MS) return null;
+    const items = entry.result.slice(0, SEARCH_MAX_RESULTS);
+    return { items, total: items.length };
+  }
+
+  setCachedSearch(key: string, result: StockSymbol[]): void {
+    const trimmed = result.slice(0, SEARCH_MAX_RESULTS);
+    this.searchCache[key] = { ts: Date.now(), result: trimmed };
+  }
+
+  getSymbolDescriptions(symbols: string[], list: StockSymbol[]): Record<string, string> {
+    if (symbols.length === 0) return {};
+    const set = new Set(symbols.map((s) => s.toUpperCase()));
+    const map: Record<string, string> = {};
+    for (const item of list) {
+      if (set.has(item.symbol)) {
+        map[item.symbol] = item.description ?? item.symbol;
+      }
+    }
+    for (const s of symbols) {
+      const key = s.toUpperCase();
+      if (!(key in map)) map[key] = s;
+    }
+    return map;
+  }
 }
 
-export async function getQuote(symbol: string): Promise<QuoteResponse> {
-  const { data } = await client.get<QuoteResponse>('/quote', {
-    params: { symbol: symbol.toUpperCase() },
-  });
-  return data;
-}
-
-const DEFAULT_PAGE_SIZE = 50;
+const finnhubService = new FinnhubService();
 
 /**
  * Returns a paginated slice of stock symbols for the exchange.
- * Full list is fetched once and cached; subsequent calls use the cache.
- *
- * NOTE: Este helper existe solo para utilidades internas puntuales.
- * No debe usarse para autocompletado interactivo en la UI.
- * Para búsquedas dinámicas, usar `searchSymbolsRemote`.
+ * Uses cached symbol list; caller must ensure cache is filled via getStockSymbols.
  */
 export async function getStockSymbolsPage(
   exchange: string = 'US',
   page: number = 1,
   pageSize: number = DEFAULT_PAGE_SIZE
 ): Promise<PaginatedSymbolsResult> {
-  const list = await ensureSymbolsCache(exchange);
-  const total = list.length;
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const items = list.slice(start, end);
-  return { items, total, page, pageSize };
+  let list = finnhubService.getSymbolsCache(exchange);
+  if (!list) {
+    list = await finnhubApi.getStockSymbols(exchange);
+    finnhubService.setSymbolsCache(exchange, list);
+  }
+  const result = finnhubService.getSymbolsPage(exchange, page, pageSize);
+  return result ?? { items: [], total: 0, page, pageSize };
 }
 
 /**
- * Search symbols by query (symbol or description) and return a paginated result.
- * Uses cached symbol list; filters then paginates.
- *
- * NOTE: Este método también depende del listado masivo `/stock/symbol`.
- * No debe usarse para búsquedas en tiempo real del usuario; preferir `searchSymbolsRemote`.
+ * Search symbols by query (symbol or description); uses cached symbol list.
  */
 export async function searchStockSymbols(
   query: string,
@@ -108,27 +134,16 @@ export async function searchStockSymbols(
   page: number = 1,
   pageSize: number = DEFAULT_PAGE_SIZE
 ): Promise<PaginatedSymbolsResult> {
-  const list = await ensureSymbolsCache(exchange);
-  const q = query.trim().toLowerCase();
-  const filtered =
-    q === ''
-      ? list
-      : list.filter(
-        (s) =>
-          s.symbol.toLowerCase().includes(q) ||
-          (s.description ?? '').toLowerCase().includes(q)
-      );
-  const total = filtered.length;
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const items = filtered.slice(start, end);
-  return { items, total, page, pageSize };
+  let list = finnhubService.getSymbolsCache(exchange);
+  if (!list) {
+    list = await finnhubApi.getStockSymbols(exchange);
+    finnhubService.setSymbolsCache(exchange, list);
+  }
+  return finnhubService.searchSymbols(list, query, page, pageSize);
 }
 
 /**
- * Remote search using Finnhub `/search` endpoint.
- * Always scoped to the given exchange (defaults to US) and cached per query.
- * This is the preferred API for interactive symbol search in the UI.
+ * Remote search using Finnhub `/search` endpoint; cached per query.
  */
 export async function searchSymbolsRemote(
   query: string,
@@ -138,46 +153,34 @@ export async function searchSymbolsRemote(
   if (q === '') {
     return { items: [], total: 0 };
   }
-
-  const key = buildSearchKey(q, exchange);
-  const now = Date.now();
-  const cached = searchCache[key];
-  if (cached && now - cached.ts <= SEARCH_TTL_MS) {
-    const items = cached.result.slice(0, SEARCH_MAX_RESULTS);
-    return { items, total: items.length };
-  }
-
-  const { data } = await client.get<SymbolLookupResponse>('/search', {
-    params: { q, exchange },
-  });
-
+  const key = finnhubService.buildSearchKey(q, exchange);
+  const cached = finnhubService.getCachedSearch(key);
+  if (cached) return cached;
+  const data = await finnhubApi.searchRemote(q, exchange);
   const list = Array.isArray(data?.result) ? data.result : [];
-  const trimmed = list.slice(0, SEARCH_MAX_RESULTS);
-  searchCache[key] = { ts: now, result: trimmed };
-
-  return { items: trimmed, total: data?.count ?? trimmed.length };
+  finnhubService.setCachedSearch(key, list);
+  const items = list.slice(0, SEARCH_MAX_RESULTS);
+  return { items, total: data?.count ?? items.length };
 }
 
 /**
- * Resolve symbol -> description for the given symbols only.
- * Fetches full symbol list once (cached) and returns a map for the requested symbols.
+ * Resolve symbol -> description; uses cached symbol list when available.
  */
 export async function getSymbolDescriptions(
   symbols: string[],
   exchange: string = 'US'
 ): Promise<Record<string, string>> {
   if (symbols.length === 0) return {};
-  const list = await ensureSymbolsCache(exchange);
-  const set = new Set(symbols.map((s) => s.toUpperCase()));
-  const map: Record<string, string> = {};
-  for (const item of list) {
-    if (set.has(item.symbol)) {
-      map[item.symbol] = item.description ?? item.symbol;
-    }
+  let list = finnhubService.getSymbolsCache(exchange);
+  if (!list) {
+    list = await finnhubApi.getStockSymbols(exchange);
+    finnhubService.setSymbolsCache(exchange, list);
   }
-  for (const s of symbols) {
-    const key = s.toUpperCase();
-    if (!(key in map)) map[key] = s;
-  }
-  return map;
+  return finnhubService.getSymbolDescriptions(symbols, list);
 }
+
+export async function getQuote(symbol: string) {
+  return finnhubApi.getQuote(symbol);
+}
+
+export { finnhubService };

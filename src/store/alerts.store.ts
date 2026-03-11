@@ -112,12 +112,9 @@ export const useAlertsStore = create<AlertsState>((set, get) => ({
       if (duplicate) return false;
     }
 
-    const merged: Alert = {
-      ...existing,
-      ...patch,
-      ...(patch.symbol !== undefined && { symbol }),
-    };
-    const next = current.map((a) => (a.id === id ? merged : a));
+    const next = current.map((a) =>
+      a.id === id ? { ...a, ...patch, ...(patch.symbol !== undefined && { symbol }) } : a
+    );
     persist(next);
     set({ alerts: next });
     return true;

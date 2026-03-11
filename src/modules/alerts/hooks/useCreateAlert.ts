@@ -12,6 +12,7 @@ import { useAlertsStore } from '@/store/alerts.store';
 import { useWatchlistStore } from '@/store/watchlist.store';
 import { useSetExtraSymbols } from '@/store/live-prices.context';
 import type { LiveQuote } from '@/store/live-prices.types';
+import { Keyboard } from 'react-native';
 
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -199,69 +200,70 @@ export function useCreateAlert(editingAlertId?: string, initialSymbol?: string) 
     targetPriceNum > 0 &&
     targetPriceValidationError == null;
 
-  const handleSubmit = React.useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const showError = React.useCallback((msg: string) => {
+    setErrorMessage(msg);
+    errorRef.current?.present();
+  }, []);
+
+  const validateSubmission = React.useCallback((): number | null => {
     if (!selectedStock) {
-      setErrorMessage(t('createAlert.errorSelectStock'));
-      errorRef.current?.present();
-      return;
+      showError(t('createAlert.errorSelectStock'));
+      return null;
     }
     const num = parseFloat(targetPrice.replace(/,/g, '.'));
     if (Number.isNaN(num) || num <= 0) {
-      setErrorMessage(t('createAlert.errorInvalidPrice'));
-      errorRef.current?.present();
-      return;
+      showError(t('createAlert.errorInvalidPrice'));
+      return null;
     }
     if (currentPrice != null) {
       if (alertType === 'above' && num <= currentPrice) {
-        setErrorMessage(t('createAlert.errorTargetMustBeAboveCurrent', { price: currentPrice }));
-        errorRef.current?.present();
-        return;
+        showError(t('createAlert.errorTargetMustBeAboveCurrent', { price: currentPrice }));
+        return null;
       }
       if (alertType === 'below' && num >= currentPrice) {
-        setErrorMessage(t('createAlert.errorTargetMustBeBelowCurrent', { price: currentPrice }));
-        errorRef.current?.present();
-        return;
+        showError(t('createAlert.errorTargetMustBeBelowCurrent', { price: currentPrice }));
+        return null;
       }
     }
-    if (editingAlertId) {
-      const updated = updateAlert(editingAlertId, {
-        symbol: selectedStock.symbol,
-        priceThreshold: num,
-        direction: alertType,
-      });
-      if (!updated) {
-        setErrorMessage(t('createAlert.errorDuplicate'));
-        errorRef.current?.present();
-        return;
+    return num;
+  }, [selectedStock, targetPrice, alertType, currentPrice, showError, t]);
+
+  const persistAlert = React.useCallback(
+    (symbol: string, price: number): boolean => {
+      if (editingAlertId) {
+        return updateAlert(editingAlertId, {
+          symbol,
+          priceThreshold: price,
+          direction: alertType,
+        });
       }
-      successRef.current?.present();
-    } else {
-      const added = addAlert({
-        symbol: selectedStock.symbol,
-        priceThreshold: num,
-        direction: alertType,
-        enabled: true,
-      });
-      if (added) {
-        addSymbol(selectedStock.symbol);
-        successRef.current?.present();
-      } else {
-        setErrorMessage(t('createAlert.errorDuplicate'));
-        errorRef.current?.present();
-      }
+      const added = addAlert({ symbol, priceThreshold: price, direction: alertType, enabled: true });
+      if (added) addSymbol(symbol);
+      return added;
+    },
+    [editingAlertId, alertType, updateAlert, addAlert, addSymbol]
+  );
+
+  const handleSubmit = React.useCallback(() => {
+    Keyboard.dismiss();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    const price = validateSubmission();
+    if (price == null) {
+      showError(t('createAlert.errorInvalidPrice'));
+      return;
+    };
+
+    const success = persistAlert(selectedStock!.symbol, price);
+
+    console.log('success', success);
+
+    if (!success) {
+      showError(t('createAlert.errorDuplicate'));
+      return;
     }
-  }, [
-    selectedStock,
-    targetPrice,
-    alertType,
-    currentPrice,
-    editingAlertId,
-    addAlert,
-    updateAlert,
-    addSymbol,
-    t,
-  ]);
+    successRef.current?.present();
+  }, [validateSubmission, persistAlert, selectedStock, showError, t]);
 
   const goBack = React.useCallback(() => {
     navigation.goBack();

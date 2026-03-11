@@ -7,10 +7,10 @@
         "@expo-google-fonts/inter": "^0.4.2",
         "@expo/vector-icons": "^15.0.2",
         "@gorhom/bottom-sheet": "^5.2.8",
-        "@react-navigation/bottom-tabs": "^7.0.5",
-        "@react-navigation/native": "^7.1.6",
+        "@react-navigation/bottom-tabs": "^7.15.5",
+        "@react-navigation/native": "^7.1.33 ",
         "@react-navigation/native-stack": "^7.14.4",
-        "@react-navigation/stack": "^7.4.8",
+        "@react-navigation/stack": "^7.8.4",
         "@shopify/flash-list": "2.0.2",
         "@wuba/react-native-echarts": "^3.0.1",
         "axios": "^1.13.6",
@@ -42,7 +42,7 @@
         "react-native-nitro-modules": "^0.35.0",
         "react-native-reanimated": "~4.1.1",
         "react-native-safe-area-context": "~5.6.0",
-        "react-native-screens": "~4.16.0",
+        "react-native-screens": "~4.24.0",
         "react-native-svg": "15.12.1",
         "react-native-svg-transformer": "^1.5.3",
         "react-native-worklets": "0.5.1",
@@ -1663,7 +1663,7 @@
 
     "react-native-safe-area-context": ["react-native-safe-area-context@5.6.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-4XGqMNj5qjUTYywJqpdWZ9IG8jgkS3h06sfVjfw5yZQZfWnRFXczi0GnYyFyCc2EBps/qFmoCH8fez//WumdVg=="],
 
-    "react-native-screens": ["react-native-screens@4.16.0", "", { "dependencies": { "react-freeze": "^1.0.0", "react-native-is-edge-to-edge": "^1.2.1", "warn-once": "^0.1.0" }, "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-yIAyh7F/9uWkOzCi1/2FqvNvK6Wb9Y1+Kzn16SuGfN9YFJDTbwlzGRvePCNTOX0recpLQF3kc2FmvMUhyTCH1Q=="],
+    "react-native-screens": ["react-native-screens@4.24.0", "", { "dependencies": { "react-freeze": "^1.0.0", "warn-once": "^0.1.0" }, "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-SyoiGaDofiyGPFrUkn1oGsAzkRuX1JUvTD9YQQK3G1JGQ5VWkvHgYSsc1K9OrLsDQxN7NmV71O0sHCAh8cBetA=="],
 
     "react-native-skia-android": ["react-native-skia-android@144.3.0", "", {}, "sha512-0XsW8JQAgNBNvCwp/ypOKDF5CjKOlCTBfj43gYXK/clystG7e4y3XF/4v0vw9Slekj9BSQruHqGYpfs5hWgO/g=="],
 

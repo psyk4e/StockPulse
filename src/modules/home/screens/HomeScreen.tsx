@@ -393,7 +393,7 @@ function getStyles(isDarkMode: boolean) {
       borderBottomLeftRadius: 12,
     },
     swipeActionText: {
-      color: THEME.colors.white,
+      color: THEME.colors.negative,
       fontSize: 12,
       fontWeight: '600',
     },

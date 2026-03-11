@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { getIsDarkMode } from '@/utils/styles.utils';
@@ -35,8 +35,18 @@ interface TimeframeConfig {
 }
 
 const MONTHS_SHORT = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 const TIMEFRAME_CONFIGS: Record<TimeframeOption, TimeframeConfig> = {
@@ -200,21 +210,22 @@ export default function ChartsScreen() {
         <Header title={t('charts.title')} />
 
         <View style={styles.chartSection}>
-          <View style={styles.timeframeRow}>
-            {TIMEFRAME_OPTIONS.map((option) => (
-              <React.Fragment key={option}>
-                <Chip
-                  label={option}
-                  selected={selectedTimeframe === option}
-                  onPress={() => setSelectedTimeframe(option)}
-                  containerStyle={styles.timeframeChip}
-                />
-                {option !== TIMEFRAME_OPTIONS[TIMEFRAME_OPTIONS.length - 1] && (
-                  <View style={styles.timeframeGap} />
-                )}
-              </React.Fragment>
-            ))}
-          </View>
+          <FlatList
+            data={TIMEFRAME_OPTIONS as unknown as TimeframeOption[]}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.timeframeList}
+            ItemSeparatorComponent={() => <View style={styles.timeframeGap} />}
+            renderItem={({ item }) => (
+              <Chip
+                label={item}
+                selected={selectedTimeframe === item}
+                onPress={() => setSelectedTimeframe(item)}
+                containerStyle={styles.timeframeChip}
+              />
+            )}
+          />
           <View style={styles.chartHeader}>
             <Text font="semiBold" style={styles.chartTitle}>
               {t('charts.multiStockComparison')}
@@ -263,11 +274,8 @@ function getStyles(isDarkMode: boolean) {
       paddingHorizontal: THEME.spacing.screenHorizontal,
       paddingTop: THEME.spacing.marginVerticalM,
     },
-    timeframeRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      marginBottom: THEME.spacing.marginVerticalM,
+    timeframeList: {
+      paddingBottom: 4,
     },
     timeframeGap: {
       width: 8,
@@ -276,7 +284,7 @@ function getStyles(isDarkMode: boolean) {
       marginRight: 0,
     },
     chartHeader: {
-      marginBottom: 8,
+      marginVertical: 8,
     },
     chartTitle: {
       fontSize: 18,

@@ -4,7 +4,6 @@ on:
   push:
     branches: ['develop']
 
-
 jobs:
   # build_android:
   #   type: build # This job type creates a production build for Android

@@ -2,14 +2,28 @@ name: Create Production Builds
 
 on:
   push:
-    branches: ['develop']
+    branches: ['feature/pipelines']
 
 jobs:
-  # build_android:
-  #   type: build # This job type creates a production build for Android
-  #   params:
-  #     platform: android
-  build_ios:
-    type: build # This job type creates a production build for iOS
-    params:
-      platform: ios
+  run-eas-workflow:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Lint
+        run: npx expo lint
+
+      - name: Test
+        run: bun test
+
+      # - name: Setup EAS
+      #   uses: expo/expo-github-action@v8
+      #   with:
+      #     eas-version: latest
+      #     token: ${{ secrets.EXPO_TOKEN }}

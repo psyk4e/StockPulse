@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView, Pressable, Modal, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { SafeAreaView } from '@/components/SafeAreaView';
@@ -21,10 +22,12 @@ import {
 import { BottomSheetBackdrop } from '@/components/bottomSheet/BottomSheetBackdrop';
 import { usePreferencesStore } from '@/store/preferences.store';
 import type { LanguageCode } from '@/store/preferences.store';
-import { useAppColorScheme } from '@/store/preferences.context';
-import { useAuth } from '@/store/auth.context';
+import { useAppColorScheme } from '@/context/preferences.context';
+import { useAuth } from '@/context/auth.context';
+import { useSecurityStore } from '@/store/security.store';
 import { FLAGS } from '@/utils/flags.utils';
 import * as Application from 'expo-application';
+import PasscodeSetupScreen from '@/modules/security/screens/PasscodeSetupScreen';
 
 const APP_VERSION = Application.nativeApplicationVersion;
 
@@ -52,6 +55,54 @@ export default function SettingsScreen() {
   const setLanguage = usePreferencesStore((s) => s.setLanguage);
   const setColorSchemePreference = usePreferencesStore((s) => s.setColorSchemePreference);
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+
+  const faceIdEnabled = useSecurityStore((s) => s.faceIdEnabled);
+  const setFaceIdEnabled = useSecurityStore((s) => s.setFaceIdEnabled);
+  const hasPasscode = useSecurityStore((s) => s.hasPasscode);
+  const setPasscode = useSecurityStore((s) => s.setPasscode);
+  const [passcodeModalVisible, setPasscodeModalVisible] = useState(false);
+  const [pendingFaceId, setPendingFaceId] = useState(false);
+
+  const handleFaceIdToggle = async (value: boolean) => {
+    if (value) {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!hasHardware || !isEnrolled) {
+        Alert.alert('Face ID', 'Face ID is not available on this device.');
+        return;
+      }
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: t('security.biometricPrompt'),
+        disableDeviceFallback: false,
+      });
+      if (result.success) {
+        setPendingFaceId(true);
+        setPasscodeModalVisible(true);
+      }
+    } else {
+      setFaceIdEnabled(false);
+      setPasscode(null);
+    }
+  };
+
+  const handlePasscodeComplete = () => {
+    setPasscodeModalVisible(false);
+    if (pendingFaceId) {
+      setFaceIdEnabled(true);
+      setPendingFaceId(false);
+    }
+  };
+
+  const handlePasscodeCancel = () => {
+    setPasscodeModalVisible(false);
+    setPendingFaceId(false);
+  };
+
+  const handlePasscodePress = () => {
+    if (hasPasscode()) {
+      setPasscodeModalVisible(true);
+    }
+  };
 
   const profileName = user?.name ?? '—';
   const profileEmail = user?.email ?? '—';
@@ -163,6 +214,35 @@ export default function SettingsScreen() {
             />
           </CardSettings>
 
+          <CardSettings title={t('settings.security')} containerStyle={styles.card}>
+            <CardSettingsRow
+              icon={<Icon name="face-id" size={20} color={THEME.colors.primaryBlue} />}
+              label={t('settings.faceId')}
+              type="switch"
+              switchValue={faceIdEnabled}
+              onSwitchValueChange={(v) => void handleFaceIdToggle(v)}
+            />
+            {faceIdEnabled && hasPasscode() ? (
+              <CardSettingsRow
+                icon={<Icon name="lock" size={20} color={THEME.colors.primaryBlue} />}
+                label={t('settings.changePasscode')}
+                type="link"
+                onPress={handlePasscodePress}
+                right={
+                  <View style={styles.languageRight}>
+                    <Icon
+                      name="chevron-right"
+                      size={16}
+                      color={
+                        isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight
+                      }
+                    />
+                  </View>
+                }
+              />
+            ) : null}
+          </CardSettings>
+
           <CardSettings title={t('settings.about')} containerStyle={styles.card}>
             <CardSettingsRow
               icon={<Icon name="info" size={20} color={THEME.colors.primaryBlue} />}
@@ -207,6 +287,13 @@ export default function SettingsScreen() {
           backdropComponent={BottomSheetBackdrop}>
           <ModalContentDummy variant={dummyModalVariant} />
         </BottomSheet>
+
+        <Modal visible={passcodeModalVisible} animationType="slide" presentationStyle="fullScreen">
+          <PasscodeSetupScreen
+            onComplete={handlePasscodeComplete}
+            onCancel={handlePasscodeCancel}
+          />
+        </Modal>
       </SafeAreaView>
     </View>
   );

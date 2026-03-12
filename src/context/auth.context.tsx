@@ -11,6 +11,7 @@ import { Auth0Provider, useAuth0 } from 'react-native-auth0';
 import { AUTH0 } from '@/utils/constant.utils';
 import { useWatchlistStore } from '@/store/watchlist.store';
 import { useAlertsStore } from '@/store/alerts.store';
+import { useSecurityStore } from '@/store/security.store';
 
 export const AUTH_ERROR_USER_CANCELLED = 'a0.session.user_cancelled';
 
@@ -109,6 +110,7 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       await clearCredentials();
       useWatchlistStore.getState().clear();
       useAlertsStore.getState().clear();
+      useSecurityStore.getState().clear();
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
     }

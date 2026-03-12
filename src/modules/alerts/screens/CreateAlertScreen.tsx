@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { useTheme, useRoute, type RouteProp, useNavigation } from '@react-navigation/native';
 import type { StackNavigatorParamList } from '@/navigation/stack-navigator';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { Header } from '@/components/Header';

@@ -5,7 +5,7 @@ import { Text } from '../Text';
 import IconWithBackground from '../IconWithBackground';
 import { Icon } from '../Icon';
 import { THEME } from '@/utils/theme.utils';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode, hexToRgba } from '@/utils/styles.utils';
 import { LivePriceDisplay } from '../LivePriceDisplay';
 
@@ -90,21 +90,14 @@ export function CardAssets(props: CardAssetsProps) {
             <LivePriceDisplay symbol={symbol} showChange />
           ) : (
             <>
-              <Text
-                title={staticProps!.price}
-                variant="mono"
-                textStyle={cardStyles.price}
-              />
+              <Text title={staticProps!.price} variant="mono" textStyle={cardStyles.price} />
               <Text
                 title={`${staticProps!.changePercent >= 0 ? '+' : ''}${staticProps!.changePercent.toFixed(1)}%`}
                 variant="Primary"
                 textStyle={[
                   cardStyles.change,
                   {
-                    color:
-                      staticProps!.changePercent >= 0
-                        ? assetBorder
-                        : THEME.colors.negative,
+                    color: staticProps!.changePercent >= 0 ? assetBorder : THEME.colors.negative,
                   },
                 ]}
               />

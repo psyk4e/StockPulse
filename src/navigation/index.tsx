@@ -1,7 +1,7 @@
 import { createStaticNavigation, StaticParamList } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '@modules/login/screens/LoginScreen';
-import { useIsSignedIn, useIsSignedOut } from '@/store/auth.context';
+import { useIsSignedIn, useIsSignedOut } from '@/context/auth.context';
 import TabNavigator from './tab-navigator';
 import StackNavigator, { type StackNavigatorParamList } from './stack-navigator';
 

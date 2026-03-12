@@ -6,8 +6,8 @@ import {
   unsubscribe as wsUnsubscribe,
 } from '@/services/finnhub.socket';
 import { getQuote as fetchQuote } from '@/services/finnhub.service';
-import { useWatchlistStore } from './watchlist.store';
-import { useAlertsStore } from './alerts.store';
+import { useWatchlistStore } from '@store/watchlist.store';
+import { useAlertsStore } from '@store/alerts.store';
 import { scheduleLocalNotification } from '@/config/notifications';
 import {
   applyRestQuote,
@@ -18,11 +18,10 @@ import {
   getHistory,
   seedQuote,
   subscribeToQuote,
-} from './live-prices.refs';
-import type { LiveQuote } from './live-prices.types';
+} from '@utils/live-prices.utils';
+import { LiveQuote } from '@types/live-prices.types';
 
-export type { LiveQuote } from './live-prices.types';
-export { subscribeToQuote, getQuote, getHistory } from './live-prices.refs';
+export { subscribeToQuote, getQuote, getHistory } from '@utils/live-prices.utils';
 
 /** Subscribe to quote updates and return latest history for the given symbols (for charts). */
 export function usePriceHistoryForSymbols(
@@ -244,8 +243,6 @@ export function LivePricesProvider({ children }: { children: React.ReactNode }) 
   }, [symbols]);
 
   return (
-    <ExtraSymbolsContext.Provider value={setExtraSymbols}>
-      {children}
-    </ExtraSymbolsContext.Provider>
+    <ExtraSymbolsContext.Provider value={setExtraSymbols}>{children}</ExtraSymbolsContext.Provider>
   );
 }

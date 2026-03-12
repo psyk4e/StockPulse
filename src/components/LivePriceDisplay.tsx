@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, type TextStyle } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { subscribeToQuote } from '@/store/live-prices.context';
-import type { LiveQuote } from '@/store/live-prices.types';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { subscribeToQuote } from '@context/live-prices.context';
+import type { LiveQuote } from 'types/live-prices.types';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from './Text';
 import { Icon } from './Icon';
@@ -86,8 +82,7 @@ export function LivePriceDisplay({
           />
           <Animated.Text
             style={[styles.changeText, changeStyle, animatedChangeStyle]}
-            numberOfLines={1}
-          >
+            numberOfLines={1}>
             {` ${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`}
           </Animated.Text>
         </View>

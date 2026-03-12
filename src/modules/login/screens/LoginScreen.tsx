@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { SafeAreaView } from '@/components/SafeAreaView';
@@ -10,7 +10,7 @@ import { Text } from '@/components/Text';
 import { Button } from '@/components/buttons/Button';
 import { StatusBar } from '@/components/StatusBar';
 import { BottomSheetError } from '@/components/bottomSheet/BottomSheetError';
-import { useAuth, AUTH_ERROR_USER_CANCELLED } from '@/store/auth.context';
+import { useAuth, AUTH_ERROR_USER_CANCELLED } from '@/context/auth.context';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 export default function LoginScreen() {

@@ -1,19 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 
 const Y_AXIS_LABEL_WIDTH = 50;
 
-const CHART_LINE_COLORS = [
-  '#2196F3',
-  '#EF5350',
-  '#4CAF50',
-  '#FF9800',
-  '#9C27B0',
-] as const;
+const CHART_LINE_COLORS = ['#2196F3', '#EF5350', '#4CAF50', '#FF9800', '#9C27B0'] as const;
 
 export interface ChartDataPoint {
   value: number;
@@ -83,25 +77,18 @@ export function MultiStockChart({
       const w = e.nativeEvent.layout.width;
       if (w > 0 && w !== containerWidth) setContainerWidth(w);
     },
-    [containerWidth],
+    [containerWidth]
   );
 
   const chartWidth =
     widthProp ?? Math.max(0, containerWidth > 0 ? containerWidth - Y_AXIS_LABEL_WIDTH : 0);
 
   const dataSetSource = dataSetsProp ?? [];
-  const dataPointCount = Math.max(
-    1,
-    ...dataSetSource.map((s) => s.data?.length ?? 0),
-  );
+  const dataPointCount = Math.max(1, ...dataSetSource.map((s) => s.data?.length ?? 0));
   const spacing =
-    chartWidth > 0 && dataPointCount > 1
-      ? (chartWidth - 16) / (dataPointCount - 1)
-      : 0;
+    chartWidth > 0 && dataPointCount > 1 ? (chartWidth - 16) / (dataPointCount - 1) : 0;
 
-  const allValues = dataSetSource.flatMap((s) =>
-    (s.data ?? []).map((p) => p.value),
-  );
+  const allValues = dataSetSource.flatMap((s) => (s.data ?? []).map((p) => p.value));
   const { maxValue, stepValue, noOfSections } = computeNiceAxis(allValues);
 
   const dataSet = dataSetSource.map((series, index) => ({
@@ -118,18 +105,12 @@ export function MultiStockChart({
     hideDataPoints: true,
   }));
 
-  const backgroundColor = isDarkMode
-    ? THEME.colors.darkCard
-    : THEME.colors.lightCard;
-  const axisColor = isDarkMode
-    ? THEME.colors.textSecondaryDark
-    : THEME.colors.textSecondaryLight;
+  const backgroundColor = isDarkMode ? THEME.colors.darkCard : THEME.colors.lightCard;
+  const axisColor = isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight;
   const textColor = axisColor;
 
   return (
-    <View
-      style={[styles.container, { backgroundColor }, containerStyle]}
-      onLayout={onLayout}>
+    <View style={[styles.container, { backgroundColor }, containerStyle]} onLayout={onLayout}>
       {chartWidth > 0 && dataSet.length > 0 && (
         <LineChart
           dataSet={dataSet}

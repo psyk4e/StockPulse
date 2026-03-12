@@ -5,7 +5,7 @@ import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from './Text';
 import { Icon } from './Icon';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import {
   BottomSheetListSelection,
   ListSelectionItem,

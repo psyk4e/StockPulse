@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
-import { useInAppNotifications } from '@/store/in-app-notifications.context';
+import { useInAppNotifications } from '@/context/in-app-notifications.context';
 
 type DataPayload = { variant?: string; [key: string]: unknown };
 

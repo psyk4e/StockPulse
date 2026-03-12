@@ -1,13 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Pressable, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, FadeIn, FadeOut } from 'react-native-reanimated';
-import { useAppColorScheme } from '@/store/preferences.context';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  FadeIn,
+  FadeOut,
+} from 'react-native-reanimated';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from '../Text';
 import { Icon } from '../Icon';
 import { Button } from '../buttons/Button';
-import type { InAppToastItem } from '@/store/in-app-notifications.context';
+import type { InAppToastItem } from '@/context/in-app-notifications.context';
 
 const AUTO_DISMISS_MS = 5000;
 
@@ -33,7 +38,9 @@ export function SnackbarToast({
   const dismissRef = useRef(false);
 
   const scale = useSharedValue(1 - stackIndex * 0.04);
-  const opacity = useSharedValue(stackIndex === 0 ? 1 : Math.max(0.4, 0.85 - (stackIndex - 1) * 0.15));
+  const opacity = useSharedValue(
+    stackIndex === 0 ? 1 : Math.max(0.4, 0.85 - (stackIndex - 1) * 0.15)
+  );
 
   useEffect(() => {
     scale.value = 1 - stackIndex * 0.04;
@@ -96,7 +103,11 @@ export function SnackbarToast({
           )}
         </View>
         <Pressable onPress={handleDismiss} hitSlop={12} style={styles.closeWrap}>
-          <Icon name="close" size={20} color={isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight} />
+          <Icon
+            name="close"
+            size={20}
+            color={isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight}
+          />
         </Pressable>
       </View>
     </Animated.View>

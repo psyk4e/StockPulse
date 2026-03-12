@@ -19,10 +19,10 @@ import {
   MarketStatusCard,
   Icon,
 } from '@/components';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { useWatchlistStore } from '@/store/watchlist.store';
 import { useAlertsStore } from '@/store/alerts.store';
-import { useMarketStatus } from '@/store/market-status.context';
+import { useMarketStatus } from '@/context/market-status.context';
 import { getSymbolDescriptions } from '@/services/finnhub.service';
 
 /** Ref methods we use from Swipeable (close). */

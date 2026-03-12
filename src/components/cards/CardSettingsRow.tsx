@@ -5,7 +5,7 @@ import { THEME } from '@/utils/theme.utils';
 import { Text } from '../Text';
 import { Icon } from '../Icon';
 import { Switch } from '../Switch';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 
 export type CardSettingsRowRightType = 'link' | 'switch' | 'text';
 

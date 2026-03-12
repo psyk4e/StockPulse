@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderWithNav } from '../../setup';
-import SettingsScreen from '@/modules/settings/SettingsScreen';
+import SettingsScreen from '@/modules/settings/screens/SettingsScreen';
 
 jest.mock('@/store/auth.context', () => ({
   useAuth: () => ({

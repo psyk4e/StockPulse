@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { Header } from '@/components/Header';
 import { Text } from '@/components/Text';
 import { Logo } from '@/components/Logo';
-import { useAuth } from '@/store/auth.context';
+import { useAuth } from '@/context/auth.context';
 
 const AVATAR_SIZE = 36;
 

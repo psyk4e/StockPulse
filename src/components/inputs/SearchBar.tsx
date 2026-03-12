@@ -3,7 +3,7 @@ import { ViewStyle } from 'react-native';
 import { Icon } from '../Icon';
 import TextInput, { TextInputProps } from './TextInput';
 import { THEME } from '@/utils/theme.utils';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 
 export interface SearchBarProps extends Omit<TextInputProps, 'leftIcon'> {

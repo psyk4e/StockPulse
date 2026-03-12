@@ -10,8 +10,8 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { getQuote, getSymbolDescriptions, searchSymbolsRemote } from '@/services/finnhub.service';
 import { useAlertsStore } from '@/store/alerts.store';
 import { useWatchlistStore } from '@/store/watchlist.store';
-import { useSetExtraSymbols } from '@/store/live-prices.context';
-import type { LiveQuote } from '@/store/live-prices.types';
+import { useSetExtraSymbols } from '@context/live-prices.context';
+import type { LiveQuote } from 'types/live-prices.types';
 import { Keyboard } from 'react-native';
 
 const SEARCH_DEBOUNCE_MS = 350;

@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ColorSchemeProvider } from '@/store/preferences.context';
+import { ColorSchemeProvider } from '@/context/preferences.context';
 import { lightTheme } from '@/utils/theme.utils';
 
 declare global {

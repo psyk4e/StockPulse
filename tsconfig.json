@@ -6,12 +6,14 @@
     "paths": {
       "@/*": ["src/*"],
       "@assets/*": ["assets/*"],
+      "@types/*": ["types/*"],
       "@components/*": ["src/components/*"],
       "@services/*": ["src/services/*"],
-      "@types/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"],
       "@languages/*": ["src/languages/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
+      "@context/*": ["src/context/*"],
+      "@store/*": ["src/store/*"]
     }
   }
 }

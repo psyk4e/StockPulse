@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ViewProps, StyleSheet } from 'react-native';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 
@@ -28,10 +28,7 @@ function IconWithBackground({
   const styles = getStyles(size, glow, isDarkMode, borderColor, backgroundColor);
 
   return (
-    <View
-      style={[styles.container, containerStyle, style]}
-      {...rest}
-    >
+    <View style={[styles.container, containerStyle, style]} {...rest}>
       <View style={styles.inner}>{children}</View>
     </View>
   );

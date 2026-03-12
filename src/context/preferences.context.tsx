@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ColorSchemeName } from 'react-native';
 import { useColorScheme } from 'react-native';
-import { useEffectiveColorScheme } from './preferences.store';
+import { useEffectiveColorScheme } from '../store/preferences.store';
 
 const ColorSchemeContext = createContext<NonNullable<ColorSchemeName> | null>(null);
 

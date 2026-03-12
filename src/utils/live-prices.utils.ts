@@ -1,4 +1,4 @@
-import type { LiveQuote, LiveQuotesMap, PriceHistoryMap } from './live-prices.types';
+import type { LiveQuote, LiveQuotesMap, PriceHistoryMap } from '@types/live-prices.types';
 
 const MAX_HISTORY_POINTS = 100;
 

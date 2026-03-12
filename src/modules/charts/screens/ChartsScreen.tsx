@@ -10,7 +10,7 @@ import { StatusBar } from '@/components/StatusBar';
 import { useTheme } from '@react-navigation/native';
 import { Header, CardAssets, Chip, MultiStockChart } from '@/components';
 import type { ChartDataSet } from '@/components/MultiStockChart';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { useWatchlistStore } from '@/store/watchlist.store';
 import { getSymbolDescriptions } from '@/services/finnhub.service';
 

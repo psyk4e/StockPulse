@@ -6,12 +6,12 @@ import Animated, {
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode, hexToRgba } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from '../Text';
 import { Icon } from '../Icon';
-import type { InAppToastItem } from '@/store/in-app-notifications.context';
+import type { InAppToastItem } from '@/context/in-app-notifications.context';
 
 const AUTO_DISMISS_MS = 5500;
 
@@ -34,7 +34,9 @@ export function TopBannerToast({
   const dismissRef = useRef(false);
 
   const scale = useSharedValue(1 - stackIndex * 0.04);
-  const opacity = useSharedValue(stackIndex === 0 ? 1 : Math.max(0.4, 0.85 - (stackIndex - 1) * 0.15));
+  const opacity = useSharedValue(
+    stackIndex === 0 ? 1 : Math.max(0.4, 0.85 - (stackIndex - 1) * 0.15)
+  );
 
   useEffect(() => {
     scale.value = 1 - stackIndex * 0.04;

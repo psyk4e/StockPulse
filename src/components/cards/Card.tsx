@@ -1,12 +1,6 @@
 import React from 'react';
-import {
-  View,
-  ViewProps,
-  Pressable,
-  StyleSheet,
-  ColorSchemeName,
-} from 'react-native';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { View, ViewProps, Pressable, StyleSheet, ColorSchemeName } from 'react-native';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 

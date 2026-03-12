@@ -2,7 +2,7 @@ import React from 'react';
 import { View, ViewProps, Pressable, StyleSheet, TextProps } from 'react-native';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { Text } from './Text';
 import { CanRender } from './CanRender';
 

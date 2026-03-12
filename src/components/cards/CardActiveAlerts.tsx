@@ -6,7 +6,7 @@ import { ChipWithIcon } from '../chips/ChipWithIcon';
 import { SwitchAlert } from '../SwitchAlert';
 import { THEME } from '@/utils/theme.utils';
 import { getIsDarkMode } from '@/utils/styles.utils';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 
 export interface CardActiveAlertsProps extends ViewProps {
   symbol: string;

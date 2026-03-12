@@ -1,7 +1,7 @@
 import { getIsDarkMode } from '@/utils/styles.utils';
 import React from 'react';
 import { View } from 'react-native';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import LogoDark from '@assets/icons/logo-round-glow-dark.svg';
 import LogoLight from '@assets/icons/logo-round-glow.svg';
 

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Pressable, PressableProps, StyleSheet, Text, TextStyle } from 'react-native';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 

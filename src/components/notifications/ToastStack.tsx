@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useInAppNotifications } from '@/store/in-app-notifications.context';
+import { useInAppNotifications } from '@/context/in-app-notifications.context';
 import { SnackbarToast } from './SnackbarToast';
 import { TopBannerToast } from './TopBannerToast';
 

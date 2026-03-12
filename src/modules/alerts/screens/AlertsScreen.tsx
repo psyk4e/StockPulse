@@ -10,10 +10,10 @@ import { StatusBar } from '@/components/StatusBar';
 import { useTheme, useNavigation } from '@react-navigation/native';
 import { Header, CardActiveAlerts } from '@/components';
 import { useAlertsStore } from '@/store/alerts.store';
-import { useQuotesForSymbols } from '@/store/live-prices.context';
+import { useQuotesForSymbols } from '@context/live-prices.context';
 import { AlertsEmptyIllustration } from '../components/AlertsEmptyIllustration';
 import { formatCondition, formatCurrentOrTriggered } from '../utils/alert.utils';
-import { useAppColorScheme } from '@/store/preferences.context';
+import { useAppColorScheme } from '@/context/preferences.context';
 
 export default function AlertsScreen() {
   const theme = useTheme();

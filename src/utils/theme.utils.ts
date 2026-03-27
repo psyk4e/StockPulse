@@ -1,32 +1,41 @@
 import { StyleSheet } from 'react-native';
 import { DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { hexToRgba } from '@/utils/styles.utils';
 
+/**
+ * Design system tokens — StockPulse
+ */
 export const colors = {
   // Brand / accent
   primaryBlue: '#2196F3',
   subtleBlue: '#81A6ED',
-  // Header gradient (purple to blue)
-  gradientStart: '#8B5CF6',
-  gradientEnd: '#2196F3',
-  avatarBorder: 'rgba(139, 92, 246, 0.4)',
+  primary: '#2196F3',
+  subtle: '#81A6ED',
+  secondary: '#1565c0',
+  tertiary: '#b34c71',
+  neutral: '#e3f2fd',
 
-  // Neutrals
+  gradientEnd: '#2196F3',
+  gradientStart: '#2196F3',
+  avatarBorder: hexToRgba('#2196F3', 0.4),
+
+  // —— Base neutrals ——
   white: '#FFFFFF',
   black: '#000000',
   lightGrey: '#888888',
   darkGrey: '#212121',
 
-  // Dark mode surfaces
+  // —— Dark mode surfaces ——
   darkBackground: '#0D0D1A',
   darkCard: '#1A1A2E',
   darkBorder: '#3E445B',
 
-  // Light mode surfaces
+  // —— Light mode surfaces ——
   lightBackground: '#F5F5F5',
   lightCard: '#FFFFFF',
   lightBorder: '#E0E0E0',
 
-  // Semantic
+  // —— Semantic (finance + feedback) ——
   positive: '#4CAF50',
   negative: '#EF5350',
   successIcon: '#00C853',
@@ -53,8 +62,10 @@ export const fontFamily = {
   black: 'Inter_900Black',
 } as const;
 
+/** Spacing: normal scale (2) — 8px base unit */
 export const spacing = {
-  screenHorizontal: 20,
+  unit: 8,
+  screenHorizontal: 16,
   headerTopPadding: 40,
   marginVerticalL: 24,
   marginVerticalM: 16,
@@ -63,6 +74,7 @@ export const spacing = {
   textGap: 8,
   cardPaddingHorizontal: 16,
   cardPaddingVertical: 16,
+  /** Moderate roundedness (design scale 2) */
   borderRadius: 12,
   fabSize: 56,
   fabMargin: 20,

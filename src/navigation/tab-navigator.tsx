@@ -10,7 +10,7 @@ import SettingsScreen from '@/modules/settings/SettingsScreen';
 const Tab = createBottomTabNavigator({
   screenOptions: function ScreenOptions() {
     return {
-      tabBarActiveTintColor: THEME.colors.primaryBlue,
+      tabBarActiveTintColor: THEME.colors.primary,
     };
   },
   screens: {

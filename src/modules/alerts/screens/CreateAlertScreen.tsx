@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { HapticsPlugin } from '@plugins/haptics.plugin';
 import { useTranslation } from 'react-i18next';
 import { useTheme, useRoute, type RouteProp, useNavigation } from '@react-navigation/native';
 import type { StackNavigatorParamList } from '@/navigation/stack-navigator';
@@ -14,13 +14,12 @@ import { Button } from '@/components/buttons/Button';
 import { TextInput } from '@/components/inputs/TextInput';
 import { Icon } from '@/components/Icon';
 import { BottomSheetListSelection } from '@/components/bottomSheet/BottomSheetListSelection';
-import { BottomSheetSuccess } from '@/components/bottomSheet/BottomSheetSuccess';
-import { BottomSheetError } from '@/components/bottomSheet/BottomSheetError';
+import { BottomSheetResult } from '@/components/bottomSheet/BottomSheetResult';
 import { SafeAreaView } from '@/components/SafeAreaView';
 import { KeyboardAvoidingView } from '@/components/KeyboardAvoidingView';
 import { StatusBar } from '@/components/StatusBar';
 import { LivePriceDisplay } from '@/components/LivePriceDisplay';
-import { useCreateAlert } from '../hooks/useCreateAlert';
+import { useCreateAlertScreen } from '../hooks/useCreateAlertScreen';
 import { getStyles } from '../styles/createAlert.style';
 
 export default function CreateAlertScreen() {
@@ -60,7 +59,7 @@ export default function CreateAlertScreen() {
     selectedValue,
     descriptionKey,
     isEditMode,
-  } = useCreateAlert(alertId, initialSymbol);
+  } = useCreateAlertScreen(alertId, initialSymbol);
 
   const iconColor = isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight;
   const dollarIcon = <Text style={[styles.dollarIcon, { color: iconColor }]}>$</Text>;
@@ -76,9 +75,7 @@ export default function CreateAlertScreen() {
       <StatusBar backgroundColor={theme.colors.notification} />
       <SafeAreaView
         edges={['top']}
-        style={{
-          backgroundColor: !isDarkMode ? THEME.colors.white : undefined,
-        }}
+        style={{ backgroundColor: !isDarkMode ? theme.colors.card : undefined }}
       />
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <Header
@@ -139,7 +136,7 @@ export default function CreateAlertScreen() {
               <Pressable
                 style={[styles.segment, alertType === 'above' && styles.segmentActive]}
                 onPress={() => {
-                  Haptics.selectionAsync();
+                  HapticsPlugin.selectionAsync();
                   setAlertType('above');
                 }}>
                 <Icon
@@ -159,7 +156,7 @@ export default function CreateAlertScreen() {
               <Pressable
                 style={[styles.segment, alertType === 'below' && styles.segmentActive]}
                 onPress={() => {
-                  Haptics.selectionAsync();
+                  HapticsPlugin.selectionAsync();
                   setAlertType('below');
                 }}>
                 <Icon
@@ -222,7 +219,7 @@ export default function CreateAlertScreen() {
           onSearchChange={handleStockSearchChange}
           loading={stockLoading}
         />
-        <BottomSheetSuccess
+        <BottomSheetResult.Success
           ref={successRef}
           snapPoints={['40%']}
           title={isEditMode ? t('createAlert.updatedTitle') : t('createAlert.successTitle')}
@@ -238,7 +235,7 @@ export default function CreateAlertScreen() {
           onButtonPress={handleSuccessClose}
           onClose={handleSuccessClose}
         />
-        <BottomSheetError
+        <BottomSheetResult.Error
           ref={errorRef}
           snapPoints={['30%']}
           title={t('createAlert.errorTitle')}

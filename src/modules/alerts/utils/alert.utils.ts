@@ -1,3 +1,4 @@
+import { ListSelectionItem } from '@/components';
 import type { Alert } from '@/store/alerts.store';
 
 export function formatCondition(alert: Alert): string {
@@ -17,4 +18,18 @@ export function formatCurrentOrTriggered(
     return `Current: $${currentPrice.toFixed(2)}`;
   }
   return 'Current: --';
+}
+
+export function mapItemsToOptions(items: { symbol: string; description?: string }[]): ListSelectionItem[] {
+  const seen = new Set<string>();
+  return items
+    .filter((s) => {
+      if (seen.has(s.symbol)) return false;
+      seen.add(s.symbol);
+      return true;
+    })
+    .map((s) => ({
+      label: `${s.symbol} - ${s.description ?? s.symbol}`,
+      value: s.symbol,
+    }));
 }

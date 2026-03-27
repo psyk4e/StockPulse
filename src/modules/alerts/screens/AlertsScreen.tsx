@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
@@ -9,38 +9,19 @@ import { Text } from '@/components/Text';
 import { StatusBar } from '@/components/StatusBar';
 import { useTheme, useNavigation } from '@react-navigation/native';
 import { Header, CardActiveAlerts } from '@/components';
-import { useAlertsStore } from '@/store/alerts.store';
-import { useQuotesForSymbols } from '@context/live-prices.context';
 import { AlertsEmptyIllustration } from '../components/AlertsEmptyIllustration';
-import { formatCondition, formatCurrentOrTriggered } from '../utils/alert.utils';
 import { useAppColorScheme } from '@/context/preferences.context';
+import { useAlertsScreen } from '../hooks/useAlertsScreen';
 
 export default function AlertsScreen() {
   const theme = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const alerts = useAlertsStore((s) => s.alerts);
-  const updateAlert = useAlertsStore((s) => s.updateAlert);
-  const alertSymbols = useMemo(() => alerts.map((a) => a.symbol), [alerts]);
   const colorScheme = useAppColorScheme();
   const isDarkMode = getIsDarkMode(colorScheme);
-  const quotes = useQuotesForSymbols(alertSymbols);
+  const { listData, handleToggleEnabled, isEmpty } = useAlertsScreen();
 
-  const listData = useMemo(() => {
-    return alerts.map((alert) => {
-      const quote = quotes[alert.symbol];
-      const currentPrice = quote?.c;
-      const status = alert.triggeredAt != null ? ('triggered' as const) : ('active' as const);
-      return {
-        ...alert,
-        condition: formatCondition(alert),
-        currentOrTriggered: formatCurrentOrTriggered(alert, currentPrice),
-        status,
-      };
-    });
-  }, [alerts, quotes]);
-
-  const handleEditAlert = useCallback(
+  const handleEditAlert = React.useCallback(
     (id: string) => {
       navigation.navigate('Stacknavigator', {
         screen: 'CreateAlert',
@@ -50,14 +31,7 @@ export default function AlertsScreen() {
     [navigation]
   );
 
-  const handleToggleEnabled = useCallback(
-    (id: string, value: boolean) => {
-      updateAlert(id, { enabled: value });
-    },
-    [updateAlert]
-  );
-
-  const renderItem = useCallback(
+  const renderItem = React.useCallback(
     ({ item }: { item: (typeof listData)[number] }) => (
       <CardActiveAlerts
         symbol={item.symbol}
@@ -70,21 +44,19 @@ export default function AlertsScreen() {
         containerStyle={styles.cardItem}
       />
     ),
-    [handleToggleEnabled, handleEditAlert, styles.cardItem]
+    [handleToggleEnabled, handleEditAlert]
   );
 
-  const keyExtractor = useCallback((item: (typeof listData)[number]) => item.id, []);
+  const keyExtractor = React.useCallback((item: (typeof listData)[number]) => item.id, []);
 
-  const ListHeaderComponent = useCallback(
+  const ListHeaderComponent = React.useCallback(
     () => (
       <Text font="semiBold" style={styles.sectionTitle}>
         {t('alerts.activeAlerts', { count: listData.length })}
       </Text>
     ),
-    [t, listData.length, styles.sectionTitle]
+    [t, listData.length]
   );
-
-  const isEmpty = alerts.length === 0;
 
   if (isEmpty) {
     return (

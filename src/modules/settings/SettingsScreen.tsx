@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Modal, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -20,14 +20,13 @@ import {
   BottomSheetListSelection,
 } from '@/components';
 import { BottomSheetBackdrop } from '@/components/bottomSheet/BottomSheetBackdrop';
-import { usePreferencesStore } from '@/store/preferences.store';
 import type { LanguageCode } from '@/store/preferences.store';
 import { useAppColorScheme } from '@/context/preferences.context';
 import { useAuth } from '@/context/auth.context';
-import { useSecurityStore } from '@/store/security.store';
 import { FLAGS } from '@/utils/flags.utils';
 import * as Application from 'expo-application';
 import PasscodeSetupScreen from '@/modules/security/screens/PasscodeSetupScreen';
+import { useSettingsScreen } from './hooks/useSettingsScreen';
 
 const APP_VERSION = Application.nativeApplicationVersion;
 
@@ -47,21 +46,26 @@ export default function SettingsScreen() {
   const isDarkMode = getIsDarkMode(colorScheme);
   const styles = getStyles(isDarkMode);
   const { t } = useTranslation();
-  const languageBottomRef = useRef<BottomSheetModal>(null);
-  const dummyModalRef = useRef<BottomSheetModal>(null);
-  const [dummyModalVariant, setDummyModalVariant] = React.useState<'Terms' | 'Privacy'>('Terms');
-  const language = usePreferencesStore((s) => s.language);
-  const colorSchemePreference = usePreferencesStore((s) => s.colorSchemePreference);
-  const setLanguage = usePreferencesStore((s) => s.setLanguage);
-  const setColorSchemePreference = usePreferencesStore((s) => s.setColorSchemePreference);
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
-
-  const faceIdEnabled = useSecurityStore((s) => s.faceIdEnabled);
-  const setFaceIdEnabled = useSecurityStore((s) => s.setFaceIdEnabled);
-  const hasPasscode = useSecurityStore((s) => s.hasPasscode);
-  const setPasscode = useSecurityStore((s) => s.setPasscode);
-  const [passcodeModalVisible, setPasscodeModalVisible] = useState(false);
-  const [pendingFaceId, setPendingFaceId] = useState(false);
+  const languageBottomRef = React.useRef<BottomSheetModal>(null);
+  const dummyModalRef = React.useRef<BottomSheetModal>(null);
+  const {
+    language,
+    colorSchemePreference,
+    notificationsEnabled,
+    faceIdEnabled,
+    passcodeModalVisible,
+    pendingFaceId,
+    dummyModalVariant,
+    setDummyModalVariant,
+    setFaceIdEnabled,
+    hasPasscode,
+    setPasscode,
+    setColorSchemePreference,
+    setLanguage,
+    setNotificationsEnabled,
+    setPasscodeModalVisible,
+    setPendingFaceId,
+  } = useSettingsScreen();
 
   const handleFaceIdToggle = async (value: boolean) => {
     if (value) {
@@ -152,42 +156,79 @@ export default function SettingsScreen() {
         edges={['top']}
         style={{ backgroundColor: !isDarkMode ? theme.colors.card : undefined }}
       />
-      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-        <Header title={t('settings.title')} />
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          style={styles.scroll}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.profileSection}>
-            <Profile
-              colorScheme={colorSchemePreference}
-              name={profileName}
-              subtitle={profileEmail}
-              avatarUri={user?.picture ?? undefined}
-              size="lg"
+      <Header title={t('settings.title')} />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.profileSection}>
+          <Profile
+            colorScheme={colorSchemePreference}
+            name={profileName}
+            subtitle={profileEmail}
+            avatarUri={user?.picture ?? undefined}
+            size="lg"
+          />
+          <Pressable style={styles.editProfileButton} onPress={() => {}}>
+            <Text
+              title={t('settings.editProfile')}
+              variant="Primary"
+              textStyle={styles.editProfileText}
             />
-            <Pressable style={styles.editProfileButton} onPress={() => {}}>
-              <Text
-                title={t('settings.editProfile')}
-                variant="Primary"
-                textStyle={styles.editProfileText}
-              />
-            </Pressable>
-          </View>
+          </Pressable>
+        </View>
 
-          <CardSettings title={t('settings.preferences')} containerStyle={styles.card}>
+        <CardSettings title={t('settings.preferences')} containerStyle={styles.card}>
+          <CardSettingsRow
+            icon={<Icon name="language" size={20} color={THEME.colors.primary} />}
+            label={t('settings.language')}
+            type="link"
+            onPress={() => languageBottomRef.current?.present()}
+            right={
+              <View style={styles.languageRight}>
+                <Text title={languageLabel} variant="Secondary" textStyle={styles.languageValue} />
+                <Icon
+                  name="chevron-right"
+                  size={16}
+                  color={
+                    isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight
+                  }
+                />
+              </View>
+            }
+          />
+          <CardSettingsRow
+            icon={<Icon name="moon" size={20} color={THEME.colors.primary} />}
+            label={t('settings.darkMode')}
+            type="switch"
+            switchValue={colorSchemePreference === 'dark'}
+            onSwitchValueChange={(value) => setColorSchemePreference(value ? 'dark' : 'light')}
+          />
+          <CardSettingsRow
+            icon={<Icon name="bell" size={20} color={THEME.colors.primary} />}
+            label={t('settings.pushNotifications')}
+            type="switch"
+            switchValue={notificationsEnabled}
+            onSwitchValueChange={setNotificationsEnabled}
+          />
+        </CardSettings>
+
+        <CardSettings title={t('settings.security')} containerStyle={styles.card}>
+          <CardSettingsRow
+            icon={<Icon name="face-id" size={20} color={THEME.colors.primary} />}
+            label={t('settings.faceId')}
+            type="switch"
+            switchValue={faceIdEnabled}
+            onSwitchValueChange={(v) => void handleFaceIdToggle(v)}
+          />
+          {faceIdEnabled && hasPasscode() ? (
             <CardSettingsRow
-              icon={<Icon name="language" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.language')}
+              icon={<Icon name="lock" size={20} color={THEME.colors.primary} />}
+              label={t('settings.changePasscode')}
               type="link"
-              onPress={() => languageBottomRef.current?.present()}
+              onPress={handlePasscodePress}
               right={
                 <View style={styles.languageRight}>
-                  <Text
-                    title={languageLabel}
-                    variant="Secondary"
-                    textStyle={styles.languageValue}
-                  />
                   <Icon
                     name="chevron-right"
                     size={16}
@@ -198,103 +239,55 @@ export default function SettingsScreen() {
                 </View>
               }
             />
-            <CardSettingsRow
-              icon={<Icon name="moon" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.darkMode')}
-              type="switch"
-              switchValue={colorSchemePreference === 'dark'}
-              onSwitchValueChange={(value) => setColorSchemePreference(value ? 'dark' : 'light')}
-            />
-            <CardSettingsRow
-              icon={<Icon name="bell" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.pushNotifications')}
-              type="switch"
-              switchValue={notificationsEnabled}
-              onSwitchValueChange={setNotificationsEnabled}
-            />
-          </CardSettings>
+          ) : null}
+        </CardSettings>
 
-          <CardSettings title={t('settings.security')} containerStyle={styles.card}>
-            <CardSettingsRow
-              icon={<Icon name="face-id" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.faceId')}
-              type="switch"
-              switchValue={faceIdEnabled}
-              onSwitchValueChange={(v) => void handleFaceIdToggle(v)}
-            />
-            {faceIdEnabled && hasPasscode() ? (
-              <CardSettingsRow
-                icon={<Icon name="lock" size={20} color={THEME.colors.primaryBlue} />}
-                label={t('settings.changePasscode')}
-                type="link"
-                onPress={handlePasscodePress}
-                right={
-                  <View style={styles.languageRight}>
-                    <Icon
-                      name="chevron-right"
-                      size={16}
-                      color={
-                        isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight
-                      }
-                    />
-                  </View>
-                }
-              />
-            ) : null}
-          </CardSettings>
-
-          <CardSettings title={t('settings.about')} containerStyle={styles.card}>
-            <CardSettingsRow
-              icon={<Icon name="info" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.version')}
-              type="text"
-              value={APP_VERSION ?? undefined}
-            />
-            <CardSettingsRow
-              icon={<Icon name="description" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.termsOfService')}
-              type="link"
-              onPress={() => openDummyModal('Terms')}
-            />
-            <CardSettingsRow
-              icon={<Icon name="shield" size={20} color={THEME.colors.primaryBlue} />}
-              label={t('settings.privacyPolicy')}
-              type="link"
-              onPress={() => openDummyModal('Privacy')}
-            />
-          </CardSettings>
-
-          <View style={styles.signOutSection}>
-            <Button variant="danger" onPress={() => void signOut()} style={styles.signOutButton}>
-              <View style={styles.signOutButtonContent}>
-                <Icon name="logout" size={20} color={THEME.colors.white} />
-                <Text title={t('settings.signOut')} textStyle={styles.signOutButtonText} />
-              </View>
-            </Button>
-          </View>
-        </ScrollView>
-        <BottomSheetListSelection
-          ref={languageBottomRef}
-          title={t('settings.language')}
-          items={languageSheetItems}
-          selectedValue={language}
-          onSelect={handleLanguageSelect}
-        />
-
-        <BottomSheet
-          ref={dummyModalRef}
-          snapPoints={['60%']}
-          backdropComponent={BottomSheetBackdrop}>
-          <ModalContentDummy variant={dummyModalVariant} />
-        </BottomSheet>
-
-        <Modal visible={passcodeModalVisible} animationType="slide" presentationStyle="fullScreen">
-          <PasscodeSetupScreen
-            onComplete={handlePasscodeComplete}
-            onCancel={handlePasscodeCancel}
+        <CardSettings title={t('settings.about')} containerStyle={styles.card}>
+          <CardSettingsRow
+            icon={<Icon name="info" size={20} color={THEME.colors.primary} />}
+            label={t('settings.version')}
+            type="text"
+            value={APP_VERSION ?? undefined}
           />
-        </Modal>
-      </SafeAreaView>
+          <CardSettingsRow
+            icon={<Icon name="description" size={20} color={THEME.colors.primary} />}
+            label={t('settings.termsOfService')}
+            type="link"
+            onPress={() => openDummyModal('Terms')}
+          />
+          <CardSettingsRow
+            icon={<Icon name="shield" size={20} color={THEME.colors.primary} />}
+            label={t('settings.privacyPolicy')}
+            type="link"
+            onPress={() => openDummyModal('Privacy')}
+          />
+        </CardSettings>
+
+        <View style={styles.signOutSection}>
+          <Button variant="danger" onPress={() => void signOut()} style={styles.signOutButton}>
+            <View style={styles.signOutButtonContent}>
+              <Icon name="logout" size={20} color={THEME.colors.white} />
+              <Text title={t('settings.signOut')} textStyle={styles.signOutButtonText} />
+            </View>
+          </Button>
+        </View>
+      </ScrollView>
+      <BottomSheetListSelection
+        snapPoints={['30%', '50%']}
+        ref={languageBottomRef}
+        title={t('settings.language')}
+        items={languageSheetItems}
+        selectedValue={language}
+        onSelect={handleLanguageSelect}
+      />
+
+      <BottomSheet ref={dummyModalRef} snapPoints={['60%']} backdropComponent={BottomSheetBackdrop}>
+        <ModalContentDummy variant={dummyModalVariant} />
+      </BottomSheet>
+
+      <Modal visible={passcodeModalVisible} animationType="slide" presentationStyle="fullScreen">
+        <PasscodeSetupScreen onComplete={handlePasscodeComplete} onCancel={handlePasscodeCancel} />
+      </Modal>
     </View>
   );
 }
@@ -302,9 +295,6 @@ export default function SettingsScreen() {
 function getStyles(isDarkMode: boolean) {
   return StyleSheet.create({
     container: {
-      flex: 1,
-    },
-    safeArea: {
       flex: 1,
     },
     scroll: {
@@ -324,7 +314,7 @@ function getStyles(isDarkMode: boolean) {
     editProfileText: {
       fontSize: 14,
       fontWeight: '600',
-      color: THEME.colors.primaryBlue,
+      color: THEME.colors.primary,
     },
     card: {
       marginBottom: THEME.spacing.marginVerticalM,

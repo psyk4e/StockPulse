@@ -1,5 +1,5 @@
 import React from 'react';
-import * as Haptics from 'expo-haptics';
+import { HapticsPlugin } from '@plugins/haptics.plugin';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -13,31 +13,11 @@ import { useWatchlistStore } from '@/store/watchlist.store';
 import { useSetExtraSymbols } from '@context/live-prices.context';
 import type { LiveQuote } from 'types/live-prices.types';
 import { Keyboard } from 'react-native';
+import { mapItemsToOptions } from '../utils/alert.utils';
+import { SEARCH_DEBOUNCE_MS } from '../utils/alert.constant';
+import type { AlertType, StockOption } from 'types/alerts.types';
 
-const SEARCH_DEBOUNCE_MS = 350;
-
-export type AlertType = 'above' | 'below';
-
-export interface StockOption {
-  symbol: string;
-  label: string;
-}
-
-function mapItemsToOptions(items: { symbol: string; description?: string }[]): ListSelectionItem[] {
-  const seen = new Set<string>();
-  return items
-    .filter((s) => {
-      if (seen.has(s.symbol)) return false;
-      seen.add(s.symbol);
-      return true;
-    })
-    .map((s) => ({
-      label: `${s.symbol} - ${s.description ?? s.symbol}`,
-      value: s.symbol,
-    }));
-}
-
-export function useCreateAlert(editingAlertId?: string, initialSymbol?: string) {
+export function useCreateAlertScreen(editingAlertId?: string, initialSymbol?: string) {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const alerts = useAlertsStore((s) => s.alerts);
@@ -86,7 +66,7 @@ export function useCreateAlert(editingAlertId?: string, initialSymbol?: string) 
   }, []);
 
   const openStockPicker = React.useCallback(() => {
-    Haptics.selectionAsync();
+    HapticsPlugin.selectionAsync();
     listSelectionRef.current?.present();
   }, []);
 
@@ -246,7 +226,7 @@ export function useCreateAlert(editingAlertId?: string, initialSymbol?: string) 
 
   const handleSubmit = React.useCallback(() => {
     Keyboard.dismiss();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    HapticsPlugin.impactAsync(HapticsPlugin.ImpactFeedbackStyle.Medium);
 
     const price = validateSubmission();
     if (price == null) {

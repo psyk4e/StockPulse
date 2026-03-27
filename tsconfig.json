@@ -13,7 +13,8 @@
       "@languages/*": ["src/languages/*"],
       "@modules/*": ["src/modules/*"],
       "@context/*": ["src/context/*"],
-      "@store/*": ["src/store/*"]
+      "@store/*": ["src/store/*"],
+      "@plugins/*": ["src/config/plugins/*"]
     }
   }
 }

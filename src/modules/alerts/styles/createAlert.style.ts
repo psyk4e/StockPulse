@@ -5,7 +5,7 @@ export function getStyles(isDarkMode: boolean) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDarkMode ? THEME.colors.darkBackground : THEME.colors.white,
+      backgroundColor: isDarkMode ? THEME.colors.darkBackground : THEME.colors.lightBackground,
     },
     safeArea: {
       flex: 1,
@@ -102,7 +102,7 @@ export function getStyles(isDarkMode: boolean) {
       gap: 8,
     },
     segmentActive: {
-      backgroundColor: THEME.colors.primaryBlue,
+      backgroundColor: THEME.colors.primary,
     },
     segmentLabel: {
       fontSize: 16,

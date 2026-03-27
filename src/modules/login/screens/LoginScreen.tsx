@@ -1,67 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { useAppColorScheme } from '@/context/preferences.context';
-import { getIsDarkMode } from '@/utils/styles.utils';
+
 import { THEME } from '@/utils/theme.utils';
 import { SafeAreaView } from '@/components/SafeAreaView';
 import { Logo } from '../../../components/Logo';
 import { Text } from '@/components/Text';
 import { Button } from '@/components/buttons/Button';
 import { StatusBar } from '@/components/StatusBar';
-import { BottomSheetError } from '@/components/bottomSheet/BottomSheetError';
-import { useAuth, AUTH_ERROR_USER_CANCELLED } from '@/context/auth.context';
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetResult } from '@/components/bottomSheet/BottomSheetResult';
+import { getIsDarkMode } from '@/utils/styles.utils';
+import { useAppColorScheme } from '@/context/preferences.context';
+import { useLoginScreen } from '../hooks/useLoginScreen';
 
 export default function LoginScreen() {
-  const { signIn, error, clearError } = useAuth();
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const errorSheetRef = useRef<BottomSheetModal>(null);
   const colorScheme = useAppColorScheme();
   const isDarkMode = getIsDarkMode(colorScheme);
   const styles = getStyles(isDarkMode);
-  const { t } = useTranslation();
 
-  useEffect(() => {
-    if (error && error.message !== AUTH_ERROR_USER_CANCELLED) {
-      errorSheetRef.current?.present();
-    }
-  }, [error]);
-
-  const handleCloseError = useCallback(() => {
-    errorSheetRef.current?.dismiss();
-    clearError();
-  }, [clearError]);
-
-  const handleSignIn = useCallback(async () => {
-    clearError();
-    setIsSigningIn(true);
-    try {
-      await signIn();
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      if (message === AUTH_ERROR_USER_CANCELLED) {
-        clearError(); // Ensure no error modal is shown on cancel.
-      }
-    } finally {
-      setIsSigningIn(false);
-    }
-  }, [signIn, clearError]);
-
-  const handleSignUp = useCallback(async () => {
-    clearError();
-    setIsSigningIn(true);
-    try {
-      await signIn({ screenHint: 'signup' });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      if (message === AUTH_ERROR_USER_CANCELLED) {
-        clearError(); // Ensure no error modal is shown on cancel.
-      }
-    } finally {
-      setIsSigningIn(false);
-    }
-  }, [signIn, clearError]);
+  const { errorSheetRef, error, isSigningIn, t, handleCloseError, handleSignIn, handleSignUp } =
+    useLoginScreen();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -102,7 +58,7 @@ export default function LoginScreen() {
           </View>
         </View>
       </SafeAreaView>
-      <BottomSheetError
+      <BottomSheetResult.Error
         ref={errorSheetRef}
         snapPoints={['35%']}
         title={t('login.errorGeneric')}
@@ -143,7 +99,7 @@ function getStyles(isDarkMode: boolean) {
     signupLink: {
       fontSize: 14,
       textAlign: 'center',
-      color: THEME.colors.primaryBlue,
+      color: THEME.colors.primary,
     },
     topSection: {
       flex: 1,

@@ -1,8 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { useTranslation } from 'react-i18next';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { getIsDarkMode } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { SafeAreaView } from '@/components/SafeAreaView';
@@ -10,7 +8,7 @@ import { Text } from '@/components/Text';
 import { HomeHeader } from '../components/HomeHeader';
 import SearchBar from '@/components/inputs/SearchBar';
 import { StatusBar } from '@/components/StatusBar';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useTheme } from '@react-navigation/native';
 import {
   FAB,
   Header,
@@ -20,15 +18,9 @@ import {
   Icon,
 } from '@/components';
 import { useAppColorScheme } from '@/context/preferences.context';
-import { useWatchlistStore } from '@/store/watchlist.store';
-import { useAlertsStore } from '@/store/alerts.store';
-import { useMarketStatus } from '@/context/market-status.context';
-import { getSymbolDescriptions } from '@/services/finnhub.service';
-
-/** Ref methods we use from Swipeable (close). */
-interface SwipeableMethods {
-  close(): void;
-}
+import { useHomeScreen } from '../hooks/useHomeScreen';
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { useTranslation } from 'react-i18next';
 
 function ListHeaderView({
   title,
@@ -89,91 +81,24 @@ const headerStyles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
-  const colorScheme = useAppColorScheme();
-  const theme = useTheme();
-  const isDarkMode = getIsDarkMode(colorScheme);
-  const styles = getStyles(isDarkMode);
   const { t } = useTranslation();
-  const navigation = useNavigation();
-  const symbols = useWatchlistStore((s) => s.symbols);
-  const removeSymbol = useWatchlistStore((s) => s.removeSymbol);
-  const alerts = useAlertsStore((s) => s.alerts);
+  const colorScheme = useAppColorScheme();
+  const isDarkMode = getIsDarkMode(colorScheme);
+  const theme = useTheme();
+  const styles = getStyles(isDarkMode);
   const {
-    status: marketStatus,
-    loading: marketStatusLoading,
-    error: marketStatusError,
-  } = useMarketStatus();
-  const [symbolToName, setSymbolToName] = useState<Record<string, string>>({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const swipeableRefs = useRef<Record<string, SwipeableMethods | null>>({});
-
-  useEffect(() => {
-    if (symbols.length === 0) {
-      setSymbolToName({});
-      return;
-    }
-    let cancelled = false;
-    getSymbolDescriptions(symbols)
-      .then((map) => {
-        if (!cancelled) setSymbolToName(map);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [symbols]);
-
-  const listData = useMemo(
-    () =>
-      symbols.map((symbol) => ({
-        symbol,
-        companyName: symbolToName[symbol] ?? symbol,
-      })),
-    [symbols, symbolToName]
-  );
-
-  const filteredListData = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return listData;
-    return listData.filter(
-      (item) => item.symbol.toLowerCase().includes(q) || item.companyName.toLowerCase().includes(q)
-    );
-  }, [listData, searchQuery]);
-
-  const goToCreateAlertScreen = useCallback((): void => {
-    navigation.navigate('Stacknavigator', { screen: 'CreateAlert' });
-  }, [navigation]);
-
-  const isEmpty = symbols.length === 0;
-
-  const handleRemoveSymbol = useCallback(
-    (symbol: string) => {
-      swipeableRefs.current[symbol]?.close();
-      removeSymbol(symbol);
-    },
-    [removeSymbol]
-  );
-
-  const handleEditSymbol = useCallback(
-    (symbol: string) => {
-      swipeableRefs.current[symbol]?.close();
-      const normalized = symbol.toUpperCase();
-      const existingAlert = alerts.find((a) => a.symbol === normalized);
-
-      if (existingAlert) {
-        navigation.navigate('Stacknavigator', {
-          screen: 'CreateAlert',
-          params: { alertId: existingAlert.id },
-        });
-      } else {
-        navigation.navigate('Stacknavigator', {
-          screen: 'CreateAlert',
-          params: { initialSymbol: symbol },
-        });
-      }
-    },
-    [alerts, navigation]
-  );
+    listData,
+    filteredListData,
+    isEmpty,
+    marketStatus,
+    marketStatusLoading,
+    marketStatusError,
+    searchQuery,
+    setSearchQuery,
+    goToCreateAlertScreen,
+    handleRemoveSymbol,
+    handleEditSymbol,
+  } = useHomeScreen();
 
   const renderLeftActions = useCallback(
     (item: (typeof listData)[number]) =>
@@ -183,7 +108,7 @@ export default function HomeScreen() {
             <Pressable
               style={[styles.swipeActionButton, styles.swipeActionEdit]}
               onPress={() => handleEditSymbol(item.symbol)}>
-              <Icon name="edit" size={22} color={THEME.colors.primaryBlue} />
+              <Icon name="edit" size={22} color={THEME.colors.primary} />
               <Text title={t('home.editStock')} style={styles.swipeActionEditText} />
             </Pressable>
           </View>
@@ -228,9 +153,6 @@ export default function HomeScreen() {
   const renderItem = useCallback(
     ({ item }: { item: (typeof listData)[number] }) => (
       <Swipeable
-        ref={(el) => {
-          swipeableRefs.current[item.symbol] = el;
-        }}
         renderLeftActions={renderLeftActions(item)}
         renderRightActions={renderRightActions(item)}
         friction={2}
@@ -381,7 +303,7 @@ function getStyles(isDarkMode: boolean) {
       borderBottomRightRadius: 12,
     },
     swipeActionEditText: {
-      color: THEME.colors.primaryBlue,
+      color: THEME.colors.primary,
       fontSize: 12,
       fontWeight: '600',
     },

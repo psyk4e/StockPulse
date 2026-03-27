@@ -8,7 +8,13 @@
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
     "web": "expo start --web",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "eas:build:development:local": "eas build --profile development --platform android --local",
+    "eas:build:preview:local": "eas build --profile preview --platform android --local",
+    "eas:build:production:local": "eas build --profile production --platform android --local",
+    "eas:build:development:remote": "eas build --profile development --platform android --remote",
+    "eas:build:preview:remote": "eas build --profile preview --platform android --remote",
+    "eas:build:production:remote": "eas build --profile production --platform android --remote"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

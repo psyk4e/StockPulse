@@ -18,10 +18,10 @@ const getVariantStyles = (variant: ButtonVariant) => {
         button: {
           backgroundColor: 'transparent',
           borderWidth: 1,
-          borderColor: THEME.colors.primaryBlue,
+          borderColor: THEME.colors.primary,
         },
         text: {
-          color: THEME.colors.primaryBlue,
+          color: THEME.colors.primary,
         },
       };
     case 'danger':
@@ -37,8 +37,8 @@ const getVariantStyles = (variant: ButtonVariant) => {
     default:
       return {
         button: {
-          backgroundColor: THEME.colors.primaryBlue,
-          shadowColor: THEME.colors.primaryBlue,
+          backgroundColor: THEME.colors.primary,
+          shadowColor: THEME.colors.primary,
         },
         text: {
           color: THEME.colors.white,

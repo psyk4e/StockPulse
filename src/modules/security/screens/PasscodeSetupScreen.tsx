@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import * as Haptics from 'expo-haptics';
+import { HapticsPlugin } from '@plugins/haptics.plugin';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from '@/components/Text';
 import { Icon } from '@/components/Icon';
@@ -37,7 +37,7 @@ export default function PasscodeSetupScreen({ onComplete, onCancel }: Props) {
   const handleKeyPress = useCallback(
     (key: KeyValue) => {
       if (key === null) return;
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void HapticsPlugin.impactAsync(HapticsPlugin.ImpactFeedbackStyle.Light);
 
       if (key === 'backspace') {
         setCode((prev) => prev.slice(0, -1));
@@ -55,13 +55,13 @@ export default function PasscodeSetupScreen({ onComplete, onCancel }: Props) {
           }
           if (next === firstCode) {
             setPasscode(next);
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            void HapticsPlugin.impactAsync(HapticsPlugin.ImpactFeedbackStyle.Medium);
             onComplete();
             return '';
           }
           setError(t('security.passcodeMismatch'));
           setShakeKey((k) => k + 1);
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          void HapticsPlugin.impactAsync(HapticsPlugin.ImpactFeedbackStyle.Heavy);
           setStep('enter');
           setFirstCode('');
           return '';
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: THEME.colors.primaryBlue,
+    backgroundColor: THEME.colors.primary,
   },
   errorText: {
     fontSize: 13,

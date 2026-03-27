@@ -99,7 +99,7 @@ const getStyleProfile = (colorScheme: ColorSchemeName) => {
     initial: {
       fontSize: 24,
       fontWeight: '700',
-      color: THEME.colors.primaryBlue,
+      color: THEME.colors.primary,
     },
     textBlock: {
       flex: 1,

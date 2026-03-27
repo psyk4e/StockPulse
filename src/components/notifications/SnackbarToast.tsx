@@ -70,7 +70,7 @@ export function SnackbarToast({
   };
 
   const iconName = item.icon === 'check' ? 'check' : item.icon === 'info' ? 'info' : 'check';
-  const iconColor = THEME.colors.primaryBlue;
+  const iconColor = THEME.colors.primary;
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ViewProps, Pressable, StyleSheet } from 'react-native';
-import { getIsDarkMode } from '@/utils/styles.utils';
+import { getIsDarkMode, hexToRgba } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from '../Text';
 import { Icon } from '../Icon';
@@ -88,6 +88,7 @@ export function CardSettingsRow({
 CardSettingsRow.displayName = 'CardSettingsRow';
 
 function getStyles(isDarkMode: boolean) {
+  const iconBgAlpha = isDarkMode ? 0.18 : 0.12;
   return StyleSheet.create({
     row: {
       flexDirection: 'row',
@@ -107,7 +108,7 @@ function getStyles(isDarkMode: boolean) {
       width: 36,
       height: 36,
       borderRadius: 16,
-      backgroundColor: 'rgba(0,136,255,0.1)',
+      backgroundColor: hexToRgba(THEME.colors.primary, iconBgAlpha),
       alignItems: 'center',
       justifyContent: 'center',
     },

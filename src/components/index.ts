@@ -100,12 +100,13 @@ export type { TextInputProps } from './inputs/TextInput';
 export { BottomSheet } from './bottomSheet/BottomSheet';
 export type { StockPulseBottomSheetProps } from './bottomSheet/BottomSheet';
 export { BottomSheetResult } from './bottomSheet/BottomSheetResult';
-export type { BottomSheetResultProps, BottomSheetResultVariant } from './bottomSheet/BottomSheetResult';
+export type {
+  BottomSheetResultProps,
+  BottomSheetResultVariant,
+  BottomSheetVariantProps,
+  BottomSheetSuccessProps,
+  BottomSheetErrorProps,
+  BottomSheetInfoProps,
+} from './bottomSheet/BottomSheetResult';
 export { BottomSheetListSelection } from './bottomSheet/BottomSheetListSelection';
 export type { BottomSheetListSelectionProps, ListSelectionItem } from './bottomSheet/BottomSheetListSelection';
-export { BottomSheetSuccess } from './bottomSheet/BottomSheetSuccess';
-export type { BottomSheetSuccessProps } from './bottomSheet/BottomSheetSuccess';
-export { BottomSheetInfo } from './bottomSheet/BottomSheetInfo';
-export type { BottomSheetInfoProps } from './bottomSheet/BottomSheetInfo';
-export { BottomSheetError } from './bottomSheet/BottomSheetError';
-export type { BottomSheetErrorProps } from './bottomSheet/BottomSheetError';

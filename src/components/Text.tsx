@@ -64,11 +64,11 @@ const getDinamicStyle = (colorScheme: ColorSchemeName) => {
       color: isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight,
     },
     caption: {
-      color: isDarkMode ? '#94a3b8' : THEME.colors.textSecondaryLight,
+      color: isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight,
       fontSize: 14,
     },
     overline: {
-      color: isDarkMode ? '#94a3b8' : THEME.colors.textSecondaryLight,
+      color: isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.textSecondaryLight,
       fontSize: 12,
       fontWeight: '600',
       letterSpacing: 0.7,
@@ -79,7 +79,7 @@ const getDinamicStyle = (colorScheme: ColorSchemeName) => {
       fontFamily: undefined,
     },
     link: {
-      color: THEME.colors.primaryBlue,
+      color: THEME.colors.primary,
     },
   });
 };

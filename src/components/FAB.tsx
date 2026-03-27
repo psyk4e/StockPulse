@@ -38,12 +38,12 @@ FAB.displayName = 'FAB';
 const styles = StyleSheet.create({
   fab: {
     alignItems: 'center',
-    backgroundColor: THEME.colors.primaryBlue,
+    backgroundColor: THEME.colors.primary,
     justifyContent: 'center',
     position: 'absolute',
     bottom: 24,
     right: 24,
-    shadowColor: THEME.colors.primaryBlue,
+    shadowColor: THEME.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,

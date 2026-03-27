@@ -16,8 +16,8 @@ export interface AlertsEmptyIllustrationProps {
 }
 
 export function AlertsEmptyIllustration({ isDarkMode }: AlertsEmptyIllustrationProps) {
-  const primary = THEME.colors.primaryBlue;
-  const accent = THEME.colors.subtleBlue;
+  const primary = THEME.colors.primary;
+  const accent = THEME.colors.subtle;
   const axisColor = isDarkMode ? THEME.colors.textSecondaryDark : THEME.colors.lightGrey;
   return (
     <View style={styles.wrapper}>

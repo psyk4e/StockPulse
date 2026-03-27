@@ -9,13 +9,13 @@ import { useAppColorScheme } from '@/context/preferences.context';
 import { getIsDarkMode, hexToRgba } from '@/utils/styles.utils';
 import { LivePriceDisplay } from '../LivePriceDisplay';
 
-/** Base hex colors for asset icons (Figma: blue, green, orange, purple, red). */
+/** Base hex colors for asset icons — design system palette + semantic negative. */
 const ASSET_COLOR_HEX = [
-  THEME.colors.primaryBlue, // blue (primary)
-  THEME.colors.positive, // green
-  THEME.colors.orange, // orange
-  THEME.colors.purple, // purple
-  THEME.colors.negative, // red
+  THEME.colors.primary,
+  THEME.colors.positive,
+  THEME.colors.secondary,
+  THEME.colors.tertiary,
+  THEME.colors.negative,
 ] as const;
 
 /** Icon background opacity by scheme so colors read like Figma (more visible on dark). */

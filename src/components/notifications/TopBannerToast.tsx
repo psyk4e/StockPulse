@@ -60,8 +60,8 @@ export function TopBannerToast({
   };
 
   const iconName = item.icon === 'bell' ? 'bell' : item.icon === 'info' ? 'info' : 'bell';
-  const iconColor = THEME.colors.primaryBlue;
-  const iconBg = hexToRgba(THEME.colors.primaryBlue, isDarkMode ? 0.15 : 0.12);
+  const iconColor = THEME.colors.primary;
+  const iconBg = hexToRgba(THEME.colors.primary, isDarkMode ? 0.15 : 0.12);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

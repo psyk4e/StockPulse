@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ViewProps, StyleSheet } from 'react-native';
 import { useAppColorScheme } from '@/context/preferences.context';
-import { getIsDarkMode } from '@/utils/styles.utils';
+import { getIsDarkMode, hexToRgba } from '@/utils/styles.utils';
 import { THEME } from '@/utils/theme.utils';
 
 export interface IconWithBackgroundProps extends ViewProps {
@@ -44,7 +44,8 @@ function getStyles(
   backgroundColor?: string
 ) {
   const bg = backgroundColor ?? (isDarkMode ? THEME.colors.darkCard : THEME.colors.lightCard);
-  const border = borderColor ?? (isDarkMode ? 'rgba(0,136,255,0.2)' : THEME.colors.lightBorder);
+  const border =
+    borderColor ?? (isDarkMode ? hexToRgba(THEME.colors.primary, 0.22) : THEME.colors.lightBorder);
 
   return StyleSheet.create({
     container: {

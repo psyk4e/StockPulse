@@ -40,16 +40,6 @@ export const SelectSection = forwardRef<React.ComponentRef<typeof Pressable>, Se
     const isDarkMode = getIsDarkMode(colorScheme);
     const styles = getStyles(isDarkMode);
 
-    const iconNode =
-      showIcon &&
-      (icon != null ? (
-        typeof icon === 'string' ? (
-          <Icon name={icon as any} size={20} color={THEME.colors.primaryBlue} />
-        ) : (
-          icon
-        )
-      ) : null);
-
     const rightContent = showSelectionIndicator ? (
       <View style={styles.radioWrap}>
         <View
@@ -140,8 +130,8 @@ function getStyles(isDarkMode: boolean) {
       justifyContent: 'center',
     },
     radioOuterSelected: {
-      borderColor: THEME.colors.primaryBlue,
-      backgroundColor: THEME.colors.primaryBlue,
+      borderColor: THEME.colors.primary,
+      backgroundColor: THEME.colors.primary,
     },
     radioInner: {
       width: 6,

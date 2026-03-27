@@ -163,7 +163,7 @@ export const BottomSheetListSelection = forwardRef<BottomSheetModal, BottomSheet
       if (!loading) return null;
       return (
         <View style={emptyStyles.wrap}>
-          <ActivityIndicator size="large" color={THEME.colors.primaryBlue} />
+          <ActivityIndicator size="large" color={THEME.colors.primary} />
           <Text title="Loading..." variant="Secondary" textStyle={emptyStyles.text} />
         </View>
       );

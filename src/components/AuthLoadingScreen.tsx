@@ -24,7 +24,7 @@ export function AuthLoadingScreen() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color={THEME.colors.primaryBlue} />
+      <ActivityIndicator size="large" color={THEME.colors.primary} />
       <Text
         title={t('login.loading')}
         variant="Secondary"

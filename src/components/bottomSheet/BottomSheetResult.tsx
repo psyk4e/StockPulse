@@ -25,7 +25,22 @@ export interface BottomSheetResultProps {
   onClose?: () => void;
 }
 
-export const BottomSheetResult = forwardRef<BottomSheetModal, BottomSheetResultProps>(
+export interface BottomSheetVariantProps {
+  title: string;
+  message?: string;
+  buttonTitle?: string;
+  onButtonPress?: () => void;
+  secondaryButtonTitle?: string;
+  onSecondaryPress?: () => void;
+  snapPoints?: (string | number)[];
+  onClose?: () => void;
+}
+
+export type BottomSheetSuccessProps = BottomSheetVariantProps;
+export type BottomSheetErrorProps = BottomSheetVariantProps;
+export type BottomSheetInfoProps = BottomSheetVariantProps;
+
+const BottomSheetResultBase = forwardRef<BottomSheetModal, BottomSheetResultProps>(
   function BottomSheetResult(
     {
       variant,
@@ -61,7 +76,7 @@ export const BottomSheetResult = forwardRef<BottomSheetModal, BottomSheetResultP
         <View style={styles.content}>
           <View style={[styles.iconWrap, isInfo && styles.iconWrapInfo]}>
             {isInfo ? (
-              <Icon name="info" size={48} color={THEME.colors.primaryBlue} />
+              <Icon name="info" size={48} color={THEME.colors.primary} />
             ) : (
               <SuccessOrErrorIcon style={{ width: 10, height: 10 }} />
             )}
@@ -98,7 +113,84 @@ export const BottomSheetResult = forwardRef<BottomSheetModal, BottomSheetResultP
   }
 );
 
-BottomSheetResult.displayName = 'BottomSheetResult';
+BottomSheetResultBase.displayName = 'BottomSheetResult';
+
+const Success = forwardRef<BottomSheetModal, BottomSheetSuccessProps>(function BottomSheetSuccess(
+  { title, message, buttonTitle = 'Done', onButtonPress, snapPoints = ['50%'], onClose },
+  ref
+) {
+  return (
+    <BottomSheetResultBase
+      ref={ref}
+      variant="success"
+      title={title}
+      message={message}
+      primaryButtonTitle={buttonTitle}
+      onPrimaryPress={onButtonPress}
+      snapPoints={snapPoints}
+      onClose={onClose}
+    />
+  );
+});
+
+Success.displayName = 'BottomSheetResult.Success';
+
+const Error = forwardRef<BottomSheetModal, BottomSheetErrorProps>(function BottomSheetError(
+  {
+    title,
+    message,
+    buttonTitle = 'Try Again',
+    onButtonPress,
+    secondaryButtonTitle = 'Dismiss',
+    onSecondaryPress,
+    snapPoints = ['55%'],
+    onClose,
+  },
+  ref
+) {
+  return (
+    <BottomSheetResultBase
+      ref={ref}
+      variant="error"
+      title={title}
+      message={message}
+      primaryButtonTitle={buttonTitle}
+      onPrimaryPress={onButtonPress}
+      secondaryButtonTitle={secondaryButtonTitle}
+      onSecondaryPress={onSecondaryPress}
+      snapPoints={snapPoints}
+      onClose={onClose}
+    />
+  );
+});
+
+Error.displayName = 'BottomSheetResult.Error';
+
+const Info = forwardRef<BottomSheetModal, BottomSheetInfoProps>(function BottomSheetInfo(
+  { title, message, buttonTitle = 'OK', onButtonPress, snapPoints = ['50%'], onClose },
+  ref
+) {
+  return (
+    <BottomSheetResultBase
+      ref={ref}
+      variant="info"
+      title={title}
+      message={message}
+      primaryButtonTitle={buttonTitle}
+      onPrimaryPress={onButtonPress}
+      snapPoints={snapPoints}
+      onClose={onClose}
+    />
+  );
+});
+
+Info.displayName = 'BottomSheetResult.Info';
+
+export const BottomSheetResult = Object.assign(BottomSheetResultBase, {
+  Success,
+  Error,
+  Info,
+});
 
 function getStyles() {
   return StyleSheet.create({
@@ -112,7 +204,7 @@ function getStyles() {
       marginBottom: 20,
     },
     iconWrapInfo: {
-      backgroundColor: `${THEME.colors.primaryBlue}18`,
+      backgroundColor: `${THEME.colors.primary}18`,
       width: 80,
       height: 80,
       borderRadius: 40,

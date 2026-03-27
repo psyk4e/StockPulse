@@ -70,7 +70,7 @@ function getStyles(isDarkMode: boolean, selected: boolean) {
       paddingRight: 8,
       borderRadius: 9999,
       backgroundColor: selected
-        ? THEME.colors.primaryBlue
+        ? THEME.colors.primary
         : isDarkMode
           ? THEME.colors.darkCard
           : THEME.colors.lightCard,

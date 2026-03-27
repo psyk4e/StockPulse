@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as LocalAuthentication from 'expo-local-authentication';
-import * as Haptics from 'expo-haptics';
+import { HapticsPlugin } from '@plugins/haptics.plugin';
 import { THEME } from '@/utils/theme.utils';
 import { Text } from '@/components/Text';
 import { Icon } from '@/components/Icon';
@@ -66,7 +66,7 @@ export default function BiometricLockScreen() {
   const handleKeyPress = useCallback(
     (key: KeyValue) => {
       if (key === null) return;
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void HapticsPlugin.impactAsync(HapticsPlugin.ImpactFeedbackStyle.Light);
 
       if (key === 'backspace') {
         setCode((prev) => prev.slice(0, -1));
@@ -82,7 +82,7 @@ export default function BiometricLockScreen() {
             return '';
           }
           setError(t('security.passcodeMismatch'));
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          void HapticsPlugin.impactAsync(HapticsPlugin.ImpactFeedbackStyle.Heavy);
           return '';
         }
         return next;
@@ -137,7 +137,7 @@ export default function BiometricLockScreen() {
 
           {faceIdEnabled ? (
             <Pressable onPress={() => void attemptBiometric()} style={styles.retryBiometric}>
-              <Icon name="face-id" size={20} color={THEME.colors.primaryBlue} />
+              <Icon name="face-id" size={20} color={THEME.colors.primary} />
               <Text title={t('security.signInWithFaceId')} textStyle={styles.retryBiometricText} />
             </Pressable>
           ) : null}
@@ -156,7 +156,7 @@ export default function BiometricLockScreen() {
           <Text title={t('security.lockTitle')} textStyle={styles.appTitle} />
 
           <View style={styles.faceIdIconContainer}>
-            <Icon name="face-id" size={56} color={THEME.colors.primaryBlue} />
+            <Icon name="face-id" size={56} color={THEME.colors.primary} />
           </View>
 
           <Text title={t('security.signInWithFaceId')} textStyle={styles.title} />
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   troubleLinkText: {
     fontSize: 14,
-    color: THEME.colors.primaryBlue,
+    color: THEME.colors.primary,
     textAlign: 'center',
   },
   footer: {
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: THEME.colors.primaryBlue,
+    backgroundColor: THEME.colors.primary,
   },
   errorText: {
     fontSize: 13,
@@ -327,6 +327,6 @@ const styles = StyleSheet.create({
   },
   retryBiometricText: {
     fontSize: 14,
-    color: THEME.colors.primaryBlue,
+    color: THEME.colors.primary,
   },
 });

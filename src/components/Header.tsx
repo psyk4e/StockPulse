@@ -112,7 +112,7 @@ function getStyles(isDarkMode: boolean) {
       paddingTop: 24,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: isDarkMode ? THEME.colors.darkBorder : THEME.colors.lightBorder,
-      backgroundColor: isDarkMode ? 'rgba(13,13,26,0.8)' : 'rgba(255,255,255,0.95)',
+      backgroundColor: isDarkMode ? THEME.colors.darkBackground : THEME.colors.white,
     },
     left: {
       minWidth: 48,
